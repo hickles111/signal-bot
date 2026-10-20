@@ -114,7 +114,7 @@ DEFAULT_CONFIG = {
     "session_end_hour_uk": 19,
     "max_trade_hours": 72,
     "max_signals_per_day": 4,
-    "max_signal_age_minutes": 30,
+    "max_signal_age_minutes": 45,
     "send_signals_too_big_for_account": True,
     "check_every_seconds": 60,
     "backtest_days": 365,
@@ -168,7 +168,7 @@ class OandaData:
     def _get(self, inst, params):
         r = self.s.get(self.URL.format(inst=inst), params=params, timeout=30)
         if r.status_code == 401:
-            sys.exit("OANDA rejected your API token - check it.")
+            raise RuntimeError("OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret")
         r.raise_for_status()
         rows = []
         for c in r.json().get("candles", []):
@@ -813,23 +813,29 @@ def run(cfg, dry_run=False, data=None):
 
 
 def check(cfg, dry_run=False, data=None, now=None):
-    """Run one check and exit - used by GitHub Actions every 15 minutes."""
+    """Run one check and exit - used by GitHub Actions every few minutes.
+    Never crashes: errors are saved in state.json and reported to Discord if they keep happening."""
     if now is None and market_closed(datetime.now(timezone.utc)):
         print("Market closed - nothing to do.")
         return
-    data = data or make_data(cfg)
-    discord = Discord(cfg["discord_webhook_url"], dry_run)
     state = load_state()
+    discord = None
     try:
+        data = data or make_data(cfg)
+        discord = Discord(cfg["discord_webhook_url"], dry_run)
         one_pass(state, data, discord, FX(data), cfg, now=now)
         state["errors"] = 0
-    except SystemExit:
+    except KeyboardInterrupt:
         raise
-    except Exception as e:
+    except BaseException as e:  # includes SystemExit from bad settings
         traceback.print_exc()
         state["errors"] = state.get("errors", 0) + 1
-        if state["errors"] == 4:   # about an hour of failures
-            discord.send(content=f"⚠️ Bot has failed 4 checks in a row: {e}")
+        state["last_error"] = f"{datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC: {e!r}"[:400]
+        if state["errors"] == 3 and discord is not None:
+            try:
+                discord.send(content=f"⚠️ Bot has failed 3 checks in a row: {str(e)[:300]}")
+            except Exception:
+                pass
     save_state(state)
 
 

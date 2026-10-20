@@ -24,7 +24,7 @@
   "session_end_hour_uk": 19,
   "max_trade_hours": 72,
   "max_signals_per_day": 4,
-  "max_signal_age_minutes": 30,
+  "max_signal_age_minutes": 45,
   "send_signals_too_big_for_account": true,
   "check_every_seconds": 60,
   "backtest_days": 365

@@ -2,8 +2,8 @@ name: Signal check
 
 on:
   schedule:
-    # Every 15 minutes, 2 minutes after each candle closes, Sunday to Friday (UTC)
-    - cron: "2,17,32,47 * * * 0-5"
+    # Every 5 minutes (GitHub often runs these late or skips some), Sunday to Friday (UTC)
+    - cron: "1-59/5 * * * 0-5"
   workflow_dispatch:   # lets you press "Run workflow" by hand
 
 permissions:
@@ -34,6 +34,7 @@ jobs:
         run: python bot.py check
 
       - name: Save trade tracking
+        if: always()
         run: |
           if [ -n "$(git status --porcelain state.json)" ]; then
             git config user.name "signal-bot"
