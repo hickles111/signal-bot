@@ -12,7 +12,7 @@ cfg = dict(bot.DEFAULT_CONFIG)
 cfg["oanda_api_token"] = os.environ["OANDA_API_TOKEN"].strip()
 cfg["backtest_days"] = int(os.environ.get("DAYS", "730"))
 out = []
-for label, insts in (("Gold + EUR/USD + GBP/USD", ["XAU_USD", "EUR_USD", "GBP_USD"]),
+for label, insts in (("Gold + silver + EUR/USD + GBP/USD", ["XAU_USD", "XAG_USD", "EUR_USD", "GBP_USD"]),
                      ("Other pairs (not used, for comparison)", ["USD_JPY", "AUD_USD", "EUR_GBP"])):
     cfg["instruments"] = insts
     buf = io.StringIO()

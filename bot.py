@@ -2,7 +2,7 @@
 Gold & FX Signal Bot -> Discord
 ================================
 Sends ManaraFX-style trading pings (entry, SL, TP1/TP2/TP3) for gold, EUR/USD
-and GBP/USD, then follows each trade and posts updates as targets are hit.
+GBP/USD and silver, then follows each trade and posts updates as targets are hit.
 
 Strategy (picked from a 2-year test of 60+ rule sets on real prices):
   * Only trade in the direction of the daily trend (price and 20-day EMA on the
@@ -57,6 +57,7 @@ INSTRUMENTS = {
     "USD_JPY": ("USDJPY", "USD", "JPY", 100_000,  0.01,   30,       0.015),
     "AUD_USD": ("AUDUSD", "AUD", "USD", 100_000,  0.0001, 20,       0.00014),
     "EUR_GBP": ("EURGBP", "EUR", "GBP", 100_000,  0.0001, 30,       0.00015),
+    "XAG_USD": ("XAGUSD", "XAG", "USD", 5_000,    0.001,  10,       0.025),
 }
 
 YAHOO_SYMBOLS = {
@@ -66,6 +67,7 @@ YAHOO_SYMBOLS = {
     "USD_JPY": "JPY=X",
     "AUD_USD": "AUDUSD=X",
     "EUR_GBP": "EURGBP=X",
+    "XAG_USD": "SI=F",       # silver futures - slightly off broker spot price
 }
 
 
@@ -78,13 +80,15 @@ def info(inst):
 def fmt_price(inst, p):
     if inst == "XAU_USD":
         return f"{p:,.2f}"
+    if inst == "XAG_USD":
+        return f"{p:.3f}"
     if inst.endswith("JPY"):
         return f"{p:.3f}"
     return f"{p:.5f}"
 
 
 def fmt_distance(inst, d):
-    if inst == "XAU_USD":
+    if inst in ("XAU_USD", "XAG_USD"):
         return f"${d:.2f}"
     return f"{d / info(inst)['pip']:.1f} pips"
 
@@ -97,7 +101,7 @@ DEFAULT_CONFIG = {
     "discord_webhook_url": "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE",
     "data_source": "oanda",
     "oanda_api_token": "PASTE_YOUR_OANDA_DEMO_TOKEN_HERE",
-    "instruments": ["XAU_USD", "EUR_USD", "GBP_USD"],
+    "instruments": ["XAU_USD", "XAG_USD", "EUR_USD", "GBP_USD"],
     "account_balance_gbp": 50,
     "risk_percent": 2.0,
     "max_risk_percent": 3.0,
@@ -439,6 +443,8 @@ class FX:
             return self.price("AUD_USD") / gbpusd
         if ccy == "XAU":
             return self.price("XAU_USD") / gbpusd
+        if ccy == "XAG":
+            return self.price("XAG_USD") / gbpusd
         raise ValueError(ccy)
 
 

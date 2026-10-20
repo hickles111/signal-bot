@@ -4,6 +4,7 @@
   "oanda_api_token": "PASTE_YOUR_OANDA_DEMO_TOKEN_HERE",
   "instruments": [
     "XAU_USD",
+    "XAG_USD",
     "EUR_USD",
     "GBP_USD"
   ],
