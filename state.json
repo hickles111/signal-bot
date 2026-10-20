@@ -1,13 +1,40 @@
 {
-  "open": [],
+  "open": [
+    {
+      "inst": "XAU_USD",
+      "side": "SELL",
+      "time": "2026-10-20T10:00:00+00:00",
+      "entry": 4112.65,
+      "sl": 4137.660719423456,
+      "tp1": 4075.133920864815,
+      "tp2": 4037.617841729631,
+      "tp3": 4000.1017625944464,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (4,115.57)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 4137.660719423456,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 18.73490196366692,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-10-20T10:00:00+00:00"
+    }
+  ],
   "closed": [],
   "last_bar": {
-    "XAU_USD": "2026-10-20T08:00:00+00:00",
-    "EUR_USD": "2026-10-20T08:00:00+00:00",
-    "GBP_USD": "2026-10-20T08:00:00+00:00",
-    "XAG_USD": "2026-10-20T08:00:00+00:00"
+    "XAU_USD": "2026-10-20T09:00:00+00:00",
+    "EUR_USD": "2026-10-20T09:00:00+00:00",
+    "GBP_USD": "2026-10-20T09:00:00+00:00",
+    "XAG_USD": "2026-10-20T09:00:00+00:00"
   },
   "last_summary": "",
-  "sent_per_day": {},
+  "sent_per_day": {
+    "2026-10-20": 1
+  },
   "errors": 0
 }
