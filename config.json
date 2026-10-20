@@ -1,0 +1,28 @@
+{
+  "discord_webhook_url": "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE",
+  "data_source": "oanda",
+  "oanda_api_token": "PASTE_YOUR_OANDA_DEMO_TOKEN_HERE",
+  "instruments": [
+    "XAU_USD",
+    "EUR_USD",
+    "GBP_USD",
+    "USD_JPY"
+  ],
+  "account_balance_gbp": 50,
+  "risk_percent": 2.0,
+  "max_risk_percent": 3.0,
+  "min_lot": 0.01,
+  "lot_step": 0.01,
+  "min_quality_score": 5,
+  "reward_to_risk": 2.0,
+  "max_signals_per_day": 2,
+  "cooldown_hours_per_instrument": 4,
+  "session_start_uk": "07:00",
+  "session_end_uk": "20:00",
+  "move_to_breakeven_at_r": 1.0,
+  "max_trade_hours": 12,
+  "send_signals_too_big_for_account": true,
+  "check_every_seconds": 60,
+  "backtest_days": 90,
+  "max_signal_age_minutes": 20
+}
