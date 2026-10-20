@@ -204,7 +204,8 @@ class YahooData:
             rows.append((ts, o, h, l, c))
         df = pd.DataFrame(rows, columns=["time", "open", "high", "low", "close"])
         df["time"] = pd.to_datetime(df["time"], unit="s", utc=True)
-        return df.set_index("time")
+        df = df.set_index("time")
+        return df[~df.index.duplicated(keep="last")].sort_index()
 
     def candles(self, inst, gran, count=300):
         return self._get(inst, gran, "30d" if gran == "M15" else "90d").tail(count)
@@ -217,7 +218,8 @@ class YahooData:
 def _to_df(rows):
     df = pd.DataFrame(rows, columns=["time", "open", "high", "low", "close"])
     df["time"] = pd.to_datetime(df["time"], utc=True)
-    return df.set_index("time")
+    df = df.set_index("time")
+    return df[~df.index.duplicated(keep="last")].sort_index()
 
 
 def make_data(cfg):

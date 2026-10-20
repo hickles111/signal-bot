@@ -30,7 +30,7 @@ def load(inst):
         df = bot.OandaData(os.environ["OANDA_API_TOKEN"].strip()).history(inst, "M15", DAYS)
         df.to_csv(f, compression="gzip")
     df.index = pd.to_datetime(df.index, utc=True)
-    return df
+    return df[~df.index.duplicated(keep="last")].sort_index()
 
 
 def resample(df, rule):
