@@ -1,118 +1,89 @@
 # Gold & FX Signal Bot (Discord)
 
-The bot watches Gold, EUR/USD, GBP/USD and USD/JPY on the 15-minute chart. It only pings Discord when a trend-pullback setup passes **every hard rule and at least 5 of 6 quality checks**. Most days you'll get 0–2 pings. That's on purpose.
+ManaraFX-style trading pings for **gold (XAUUSD), EURUSD and GBPUSD**, sent to your Discord. It runs free on GitHub, so your PC can be off.
 
-Each ping tells you the entry, stop loss, take profit, lot size, how much you risk and stand to make in £, and why the trade was picked. Then it follows the trade for you:
+Each ping gives you **Entry, SL, TP1, TP2 and TP3**, plus a lot size for your account and the reasons for the trade. The bot then follows the trade and posts updates:
 
-- 🛡️ It tells you when to move your stop to entry, once the trade is +1R in profit. From then on, the trade can't lose.
-- ✅ / ❌ It reports when the trade hits take profit or stop loss.
-- ⏱️ If a trade is still open after 12 hours, it tells you to close it.
-- 📊 Every Friday evening it posts a weekly summary.
+- ✅ **TP1 hit:** close ⅓ and move your SL to entry. The rest is now risk-free.
+- ✅✅ **TP2 hit:** close another ⅓ and move your SL to TP1.
+- 🎯 **TP3 hit:** trade complete.
+- ❌ **SL hit**, ➖ **back to entry**, or ⏱️ **open 72h, close it**.
+- 📊 A weekly summary every Friday evening.
 
-> Not financial advice. No strategy wins every trade. This one aims to win about 2× what it loses on each trade, so it can be profitable while being right less than half the time.
-
----
-
-## Honest numbers for a £50 account
-
-- The bot risks **2% per trade (about £1)**, so a winning trade makes about **£2**.
-- **Gold is too big for £50.** Under UK rules, the smallest gold trade (0.01 lots) needs over £60 of margin. Gold pings will arrive in **orange, marked "watch only"**. Forex pings in green or red are ones you can actually take.
-- You can only hold **one trade at a time**, because one 0.01 lot forex trade uses about £25–30 of margin.
-- Realistically, that's a few pounds a week **if the strategy works**. The real value of £50 is proving the system works before you put more in.
+> Not financial advice. Past results don't guarantee future results.
 
 ---
 
-## Setup (about 15 minutes)
+## The strategy
 
-### 1. Install Python
-Download Python from **python.org**. On Windows, **tick "Add Python to PATH"** during install.
+The rules were chosen from a test of 60+ rule sets on 2 years of real prices:
 
-### 2. Install the bot's packages
-Open a terminal in this folder. On Windows, click the folder's address bar, type `cmd` and press Enter. Then run:
-```
-pip install -r requirements.txt
-```
+- **Trend:** only trade with the daily trend (price and the 20-day average on the same side of the 50-day average).
+- **Entry:** a 1-hour candle closes beyond the **high or low of the last 48 hours**, between 07:00 and 19:59 UK time.
+- **Stop loss:** 2× the hourly ATR (average hourly range), so it's wider when the market is moving more.
+- **Targets:** TP1 / TP2 / TP3 at 1.5× / 3× / 4.5× the risk, closing a third at each.
 
-### 3. Make a Discord webhook (where pings go)
-1. In your Discord server, open the channel you want, e.g. `#signals`.
-2. Go to **Edit Channel → Integrations → Webhooks → New Webhook**.
-3. Click **Copy Webhook URL**.
-4. Open `config.json` and paste it in place of `PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE`.
-5. Turn on notifications for that channel in the Discord app so your phone buzzes.
+**2-year backtest on real prices (Oct 2024 – Oct 2026):**
 
-### 4. Get free real-time prices (OANDA demo)
-1. Sign up for a free **demo / practice account** at oanda.com. You don't need to deposit anything.
-2. In your account area, find **API access** (it may be called "Manage API Access") and generate a token.
-3. Paste the token into `config.json` in place of `PASTE_YOUR_OANDA_DEMO_TOKEN_HERE`.
+| | Signals | Won | Profit factor | Total | Worst dip |
+|---|---|---|---|---|---|
+| Gold | 103 | 53% | 1.99 | +48.5R | 5.6R |
+| EURUSD | 99 | 42% | 1.20 | +11.7R | 8.5R |
+| GBPUSD | 102 | 42% | 1.12 | +7.1R | 6.9R |
+| **All three** | **304** | **46%** | **1.40** | **+67.3R** | **11.5R** |
 
-*No-signup alternative:* set `"data_source": "yahoo"`. That works for forex, but gold uses futures prices, which can be a few dollars off your broker's price. OANDA is better.
+That's about **3 pings a week**, and both years were profitable (+35.6R, then +31.8R). R = the amount you risk on one trade.
 
-### 5. Test it
-```
-python bot.py test-discord     ← should ping your channel
-python bot.py backtest         ← tests the strategy on the last 90 days of REAL prices
-```
-**Read the backtest before anything else.** It shows the win rate, total profit in R and £, the worst losing streak, and the profit factor.
-- Profit factor **above 1.3** is decent.
-- **Below 1.0** means it would have lost money. Don't trade it. Tell Claude, and the rules can be adjusted.
-
-### 6. Run it
-```
-python bot.py run
-```
-On Windows you can just double-click `start_bot.bat`; on Mac, `start_bot.command`. Leave the window open. The PC must stay on and **not go to sleep** while the market is open (Sunday 10pm to Friday 10pm UK time). On Windows, go to **Settings → System → Power** and set sleep to "Never" while it runs.
-
-To see how all the live signals have done so far:
-```
-python bot.py stats
-```
+**Be realistic about these numbers:**
+- **Most of the profit came from gold**, during its big 2024–26 rally. A long trend like that won't last forever.
+- The same rules **lost money on USDJPY, AUDUSD and EURGBP**, so those pairs are switched off.
+- I picked these three markets *after* seeing the results, so real trading will likely do somewhat worse. The bot tracks its live record, so you'll know for sure.
 
 ---
 
-## Run it without your PC (free)
+## What £50 can do
 
-See **PHONE_SETUP.md**. GitHub runs the bot every 15 minutes for free, and you can set it all up from your phone.
+The average stop is about **$27 on gold, 28 pips on EURUSD and 34 pips on GBPUSD**. At the smallest size (0.01 lots):
+- **Gold** risks about **£20** per trade and needs more margin than £50, so it's **watch/demo only**.
+- **EURUSD / GBPUSD** risk about **£2–2.60** per trade (4–5% of £50). That's above the bot's 3% safety limit, so those pings also arrive **orange = watch/demo only**.
+
+With **£100 or more**, the forex pings fit at sensible risk. Update `account_balance_gbp` in `config.json` when your balance changes. **Demo-trade the pings for at least a month first.**
+
+---
+
+## Running it (GitHub, free)
+
+Everything is already set up in your repository. See **PHONE_SETUP.md** for the full steps. In short:
+
+1. Your two secrets must be added: `DISCORD_WEBHOOK_URL` and `OANDA_API_TOKEN`.
+2. **Actions → Signal check → Enable workflow.** This checks the market every 15 minutes, Sunday to Friday.
+3. Optional: **Actions → Bot tools → Run workflow → backtest** posts the latest backtest to Discord.
+
+To run it on a PC instead, install Python, run `pip install -r requirements.txt`, put your webhook and token in `config.json`, then run `python bot.py run` (or double-click `start_bot.bat`).
 
 ---
 
 ## How to use a ping
 
-1. Check the colour first. **Orange = watch only**, so don't trade it with real money.
-2. **Don't chase.** If price has already passed the "Don't chase" level, skip the trade.
-3. Place the trade **with the stop loss and take profit set straight away**. Never trade without the stop.
-4. When the 🛡️ message arrives, move your stop loss to your entry price.
-5. Glance at the news calendar (forexfactory.com). Skip trades within 30 minutes of a red-folder news event for that currency. The bot can't see the news.
-
-## The plan (please actually do this)
-
-1. **Weeks 1–4: demo only.** Take every green or red ping on a demo account set to £50.
-2. After 20+ signals, run `python bot.py stats`. If the total R is positive and the profit factor is above 1.3, go live with real £50 at the same 2% risk.
-3. Only add money once live results match demo. **Never raise risk_percent to try to hit a daily target.** That's how small accounts get wiped.
+1. **Orange = watch/demo only**: the trade is too big for your account balance.
+2. **Don't chase.** If price is already past the "Don't chase" level, skip it.
+3. Set the **SL straight away**. If your size allows, split it into 3 parts with TP1, TP2 and TP3.
+4. Follow the update messages: SL to entry at TP1, SL to TP1 at TP2.
+5. Check the news calendar (forexfactory.com). The bot can't see news events.
 
 ---
 
 ## Settings (`config.json`)
 
+To edit on GitHub: open the file, tap ✏️, change it, then **Commit changes**.
+
 | Setting | What it does |
 |---|---|
-| `instruments` | Markets to watch. Options: `XAU_USD`, `EUR_USD`, `GBP_USD`, `USD_JPY`, `AUD_USD`, `EUR_GBP` |
-| `account_balance_gbp` | Your account size. **Update it as your balance changes**, because it sets the lot size |
-| `risk_percent` | % of the account to risk per trade (2 = £1 on £50). 1–2 is sensible |
-| `max_risk_percent` | Pings that would risk more than this, even at the smallest size, are marked "watch only" |
-| `min_quality_score` | 5 = strict (default), 6 = only perfect setups (very few pings), 4 = more pings, lower quality |
-| `max_signals_per_day` | Hard cap on pings per day |
-| `reward_to_risk` | Take profit distance as a multiple of the stop (2 = aim for twice what you risk) |
-| `session_start_uk` / `session_end_uk` | Only looks for trades between these UK times (London + New York sessions) |
-| `send_signals_too_big_for_account` | `false` = hide the orange "watch only" pings completely |
-
-## What the bot looks for
-
-**Hard rules (all must pass):**
-- The 1-hour trend is clear: price and the 50 EMA are on the same side of the 200 EMA.
-- The 15-minute trend agrees: the 20 EMA is beyond the 50 EMA in the trend direction.
-- Price pulled back to the 20 EMA within the last hour, then a candle closed back in the trend direction, past the previous candle.
-- Volatility is normal. It skips dead markets and news spikes.
-- The stop isn't too wide. It sits just past the pullback swing.
-- The candle closed during London or New York hours.
-
-**Quality checks (needs 5 of 6):** trend strength (ADX ≥ 20), healthy momentum (RSI not stretched), 1-hour momentum agrees, price not overstretched from the 50 EMA, a strong confirmation candle, and no recent high or low between entry and target.
+| `instruments` | Markets to watch (default gold, EURUSD, GBPUSD) |
+| `account_balance_gbp` | Your account size. It sets the lot size, so keep it updated |
+| `risk_percent` | % of the account risked per trade (2 is sensible) |
+| `max_risk_percent` | Pings that would risk more than this, even at 0.01 lots, are marked orange |
+| `send_signals_too_big_for_account` | `false` = don't send orange pings at all |
+| `take_profits_r` | TP1/TP2/TP3 as multiples of the risk |
+| `max_signals_per_day` | Cap on pings per day |
+| `session_start_hour_uk` / `session_end_hour_uk` | Hours (UK time) when new signals can fire |

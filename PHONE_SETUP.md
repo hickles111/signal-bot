@@ -34,17 +34,14 @@ In the repo, go to **Settings → Secrets and variables → Actions → New repo
 | `DISCORD_WEBHOOK_URL` | the Discord webhook URL from step 1 |
 | `OANDA_API_TOKEN` | the OANDA token from step 2 |
 
-## 6. Test it
-1. Open the **Actions** tab. If GitHub asks, tap the button to enable workflows.
-2. Tap **Bot tools → Run workflow**, choose `test-discord`, and run it. Your phone should get a ping.
-3. Run **Bot tools** again with `backtest`. After a minute or two, the results on 90 days of real prices are posted to Discord.
-   **If PF (profit factor) is under 1.3, don't trade it yet.** Send the numbers to Claude so the rules can be tuned.
-
-That's it. The **Signal check** workflow now runs every 15 minutes, Sunday to Friday, by itself.
+## 6. Turn it on
+1. Open the **Actions** tab.
+2. Tap **Signal check**, then **Enable workflow**. It now checks the market every 15 minutes, Sunday to Friday.
+3. Optional: tap **Bot tools → Enable workflow**, then **Run workflow** and choose `backtest` to post the latest 2-year results to Discord, or `test-discord` for a test ping.
 
 ## Good to know
-- GitHub sometimes starts runs a few minutes late, and very occasionally skips one. The bot catches up on missed candles, but it won't send signals older than 20 minutes, because price has probably moved by then.
-- To change settings, open `config.json` in the repo, tap the pencil icon, edit, and commit. Remember to update `account_balance_gbp` as your balance changes.
+- Pings arrive within a few minutes of a 1-hour candle closing. GitHub sometimes runs a few minutes late, so the bot skips signals more than 30 minutes old.
+- To change settings, open `config.json` in the repo, tap the pencil icon, edit, and commit. Keep `account_balance_gbp` up to date.
 - To pause the bot: **Actions → Signal check → ⋯ → Disable workflow**.
-- GitHub may email you if a run fails. One-off failures are normal; the bot also warns you in Discord if it fails 4 checks in a row.
-- Demo-trade the signals for 3–4 weeks before using real money.
+- The bot warns you in Discord if it fails 4 checks in a row.
+- Demo-trade the pings for at least a month before using real money.
