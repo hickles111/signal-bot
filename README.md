@@ -1,6 +1,6 @@
 # Gold & FX Signal Bot (Discord)
 
-ManaraFX-style trading pings for **gold (XAUUSD), EURUSD and GBPUSD**, sent to your Discord. It runs free on GitHub, so your PC can be off.
+ManaraFX-style trading pings for **gold (XAUUSD), silver (XAGUSD), EURUSD and GBPUSD**, sent to your Discord. It runs free on GitHub, so your PC can be off.
 
 Each ping gives you **Entry, SL, TP1, TP2 and TP3**, plus a lot size for your account and the reasons for the trade. The bot then follows the trade and posts updates:
 
@@ -28,23 +28,24 @@ The rules were chosen from a test of 60+ rule sets on 2 years of real prices:
 | | Signals | Won | Profit factor | Total | Worst dip |
 |---|---|---|---|---|---|
 | Gold | 103 | 53% | 1.99 | +48.5R | 5.6R |
+| Silver | 98 | 42% | 1.25 | +14.8R | 10.1R |
 | EURUSD | 99 | 42% | 1.20 | +11.7R | 8.5R |
 | GBPUSD | 102 | 42% | 1.12 | +7.1R | 6.9R |
-| **All three** | **304** | **46%** | **1.40** | **+67.3R** | **11.5R** |
+| **All four** | **402** | **45%** | **1.36** | **+82.2R** | **19.0R** |
 
-That's about **3 pings a week**, and both years were profitable (+35.6R, then +31.8R). R = the amount you risk on one trade.
+That's about **4 pings a week**, and both years were profitable (+40.4R, then +41.7R). R = the amount you risk on one trade.
 
 **Be realistic about these numbers:**
 - **Most of the profit came from gold**, during its big 2024–26 rally. A long trend like that won't last forever.
-- The same rules **lost money on USDJPY, AUDUSD and EURGBP**, so those pairs are switched off.
-- I picked these three markets *after* seeing the results, so real trading will likely do somewhat worse. The bot tracks its live record, so you'll know for sure.
+- The same rules were tested on 20 markets. Most **lost money or only worked in one year** (USDJPY, AUDUSD, EURGBP, indices, oil), so they're switched off.
+- I picked these four markets *after* seeing the results, so real trading will likely do somewhat worse. The bot tracks its live record, so you'll know for sure.
 
 ---
 
 ## What £50 can do
 
 The average stop is about **$27 on gold, 28 pips on EURUSD and 34 pips on GBPUSD**. At the smallest size (0.01 lots):
-- **Gold** risks about **£20** per trade and needs more margin than £50, so it's **watch/demo only**.
+- **Gold and silver** risk about **£20+** per trade and need more margin than £50, so they're **watch/demo only**.
 - **EURUSD / GBPUSD** risk about **£2–2.60** per trade (4–5% of £50). That's above the bot's 3% safety limit, so those pings also arrive **orange = watch/demo only**.
 
 With **£100 or more**, the forex pings fit at sensible risk. Update `account_balance_gbp` in `config.json` when your balance changes. **Demo-trade the pings for at least a month first.**
@@ -79,7 +80,7 @@ To edit on GitHub: open the file, tap ✏️, change it, then **Commit changes**
 
 | Setting | What it does |
 |---|---|
-| `instruments` | Markets to watch (default gold, EURUSD, GBPUSD) |
+| `instruments` | Markets to watch (default gold, silver, EURUSD, GBPUSD) |
 | `account_balance_gbp` | Your account size. It sets the lot size, so keep it updated |
 | `risk_percent` | % of the account risked per trade (2 is sensible) |
 | `max_risk_percent` | Pings that would risk more than this, even at 0.01 lots, are marked orange |
