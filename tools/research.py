@@ -92,21 +92,6 @@ def simulate(df, sigs, spread, hold, be_r):
 
 
 # ----------------------------------------------------------- strategies ---- #
-def s_m15_pullback(inst, m15, h1, p):
-    """Current bot rules (baseline)."""
-    cfg = dict(bot.DEFAULT_CONFIG)
-    cfg["min_quality_score"] = p["score"]
-    cfg["reward_to_risk"] = p["rr"]
-    cfg["session_start_uk"], cfg["session_end_uk"] = "07:00", "20:00"
-    df = bot.prepare(m15, resample(m15, "1h"))
-    sigs = []
-    for i in range(110, len(df) - 1):
-        s = bot.analyse(inst, df, i, cfg)
-        if s:
-            sigs.append((i, 1 if s.side == "BUY" else -1, abs(s.entry - s.sl), p["rr"]))
-    return df, sigs
-
-
 def s_london_breakout(inst, m15, h1, p):
     """Asian range (00:00-07:00 UK) broken by a 15m close between 07:00 and 10:45 UK."""
     df = add_daily(m15, resample(m15, "1D"))
@@ -226,8 +211,6 @@ def s_h1_rsi2(inst, m15, h1, p):
 
 
 STRATS = []
-for sc in (5, 6):
-    STRATS.append(("Current bot (15m pullback)", s_m15_pullback, dict(score=sc, rr=2.0, hold=48, be=1.0)))
 for rr in (1.0, 1.5, 2.0):
     for stop in ("range", "mid"):
         for trend in (False, True):

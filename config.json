@@ -5,24 +5,26 @@
   "instruments": [
     "XAU_USD",
     "EUR_USD",
-    "GBP_USD",
-    "USD_JPY"
+    "GBP_USD"
   ],
   "account_balance_gbp": 50,
   "risk_percent": 2.0,
   "max_risk_percent": 3.0,
   "min_lot": 0.01,
   "lot_step": 0.01,
-  "min_quality_score": 5,
-  "reward_to_risk": 2.0,
-  "max_signals_per_day": 2,
-  "cooldown_hours_per_instrument": 4,
-  "session_start_uk": "07:00",
-  "session_end_uk": "20:00",
-  "move_to_breakeven_at_r": 1.0,
-  "max_trade_hours": 12,
+  "breakout_hours": 48,
+  "stop_atr": 2.0,
+  "take_profits_r": [
+    1.5,
+    3.0,
+    4.5
+  ],
+  "session_start_hour_uk": 7,
+  "session_end_hour_uk": 19,
+  "max_trade_hours": 72,
+  "max_signals_per_day": 4,
+  "max_signal_age_minutes": 30,
   "send_signals_too_big_for_account": true,
   "check_every_seconds": 60,
-  "backtest_days": 90,
-  "max_signal_age_minutes": 20
+  "backtest_days": 365
 }

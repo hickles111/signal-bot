@@ -1,16 +1,25 @@
 """
 Gold & FX Signal Bot -> Discord
 ================================
-Watches gold (XAU/USD) and forex majors on the 15-minute chart, and only pings
-Discord when a high-quality trend-pullback setup lines up on two timeframes.
+Sends ManaraFX-style trading pings (entry, SL, TP1/TP2/TP3) for gold, EUR/USD
+and GBP/USD, then follows each trade and posts updates as targets are hit.
+
+Strategy (picked from a 2-year test of 60+ rule sets on real prices):
+  * Only trade in the direction of the daily trend (price and 20-day EMA on the
+    same side of the 50-day EMA).
+  * Enter when a 1-hour candle closes beyond the high/low of the last 48 hours,
+    between 07:00 and 19:59 UK time.
+  * Stop loss 2x the hourly ATR. TP1/TP2/TP3 at 1.5x / 3x / 4.5x the risk.
+    Close a third at each TP; stop to entry after TP1, to TP1 after TP2.
 
 Commands:
-    python bot.py run            # watch the market and send pings (leave running on a PC)
     python bot.py check          # check once and exit (used by GitHub Actions)
-    python bot.py run --dry-run  # same, but print pings instead of sending them
-    python bot.py backtest       # test the strategy on the last ~90 days of real data
+    python bot.py run            # keep checking every minute (leave running on a PC)
+    python bot.py backtest       # test the strategy on the last year of real prices
     python bot.py stats          # results of every signal the bot has sent so far
     python bot.py test-discord   # send a test message to check your webhook
+Add --dry-run to print pings instead of sending them; add --discord to backtest
+to post the results to Discord.
 
 Not financial advice. Past results don't guarantee future results.
 """
@@ -41,13 +50,13 @@ UK = ZoneInfo("Europe/London")
 # --------------------------------------------------------------------------- #
 
 INSTRUMENTS = {
-    #           display    base   quote  contract  pip     leverage  spread (typical, price units)
-    "XAU_USD": ("Gold",    "XAU", "USD", 100,      0.1,    20,       0.35),
-    "EUR_USD": ("EUR/USD", "EUR", "USD", 100_000,  0.0001, 30,       0.00012),
-    "GBP_USD": ("GBP/USD", "GBP", "USD", 100_000,  0.0001, 30,       0.00015),
-    "USD_JPY": ("USD/JPY", "USD", "JPY", 100_000,  0.01,   30,       0.015),
-    "AUD_USD": ("AUD/USD", "AUD", "USD", 100_000,  0.0001, 20,       0.00014),
-    "EUR_GBP": ("EUR/GBP", "EUR", "GBP", 100_000,  0.0001, 30,       0.00015),
+    #           symbol    base   quote  contract  pip     leverage  spread (typical, price units)
+    "XAU_USD": ("XAUUSD", "XAU", "USD", 100,      0.1,    20,       0.35),
+    "EUR_USD": ("EURUSD", "EUR", "USD", 100_000,  0.0001, 30,       0.00012),
+    "GBP_USD": ("GBPUSD", "GBP", "USD", 100_000,  0.0001, 30,       0.00015),
+    "USD_JPY": ("USDJPY", "USD", "JPY", 100_000,  0.01,   30,       0.015),
+    "AUD_USD": ("AUDUSD", "AUD", "USD", 100_000,  0.0001, 20,       0.00014),
+    "EUR_GBP": ("EURGBP", "EUR", "GBP", 100_000,  0.0001, 30,       0.00015),
 }
 
 YAHOO_SYMBOLS = {
@@ -88,24 +97,23 @@ DEFAULT_CONFIG = {
     "discord_webhook_url": "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE",
     "data_source": "oanda",
     "oanda_api_token": "PASTE_YOUR_OANDA_DEMO_TOKEN_HERE",
-    "instruments": ["XAU_USD", "EUR_USD", "GBP_USD", "USD_JPY"],
+    "instruments": ["XAU_USD", "EUR_USD", "GBP_USD"],
     "account_balance_gbp": 50,
     "risk_percent": 2.0,
     "max_risk_percent": 3.0,
     "min_lot": 0.01,
     "lot_step": 0.01,
-    "min_quality_score": 5,
-    "reward_to_risk": 2.0,
-    "max_signals_per_day": 2,
-    "cooldown_hours_per_instrument": 4,
-    "session_start_uk": "07:00",
-    "session_end_uk": "20:00",
-    "move_to_breakeven_at_r": 1.0,
-    "max_trade_hours": 12,
+    "breakout_hours": 48,
+    "stop_atr": 2.0,
+    "take_profits_r": [1.5, 3.0, 4.5],
+    "session_start_hour_uk": 7,
+    "session_end_hour_uk": 19,
+    "max_trade_hours": 72,
+    "max_signals_per_day": 4,
+    "max_signal_age_minutes": 30,
     "send_signals_too_big_for_account": True,
     "check_every_seconds": 60,
-    "max_signal_age_minutes": 20,
-    "backtest_days": 90,
+    "backtest_days": 365,
 }
 
 
@@ -123,6 +131,8 @@ def load_config():
     for inst in cfg["instruments"]:
         if inst not in INSTRUMENTS:
             sys.exit(f"Unknown instrument {inst}. Choose from: {', '.join(INSTRUMENTS)}")
+    if len(cfg["take_profits_r"]) != 3:
+        sys.exit("take_profits_r needs exactly three numbers, e.g. [1.5, 3.0, 4.5]")
     return cfg
 
 
@@ -133,6 +143,13 @@ def load_config():
 GRAN_SECONDS = {"M15": 900, "H1": 3600}
 
 
+def _to_df(rows):
+    df = pd.DataFrame(rows, columns=["time", "open", "high", "low", "close"])
+    df["time"] = pd.to_datetime(df["time"], utc=True)
+    df = df.set_index("time")
+    return df[~df.index.duplicated(keep="last")].sort_index()
+
+
 class OandaData:
     """Free real-time data from an OANDA demo (practice) account."""
 
@@ -140,15 +157,14 @@ class OandaData:
 
     def __init__(self, token):
         if not token or token.startswith("PASTE"):
-            sys.exit("Add your OANDA demo API token to config.json (see README), "
-                     "or set \"data_source\": \"yahoo\".")
+            sys.exit("Add your OANDA demo API token (see README), or set \"data_source\": \"yahoo\".")
         self.s = requests.Session()
         self.s.headers["Authorization"] = f"Bearer {token}"
 
     def _get(self, inst, params):
-        r = self.s.get(self.URL.format(inst=inst), params=params, timeout=20)
+        r = self.s.get(self.URL.format(inst=inst), params=params, timeout=30)
         if r.status_code == 401:
-            sys.exit("OANDA rejected your API token - check it in config.json.")
+            sys.exit("OANDA rejected your API token - check it.")
         r.raise_for_status()
         rows = []
         for c in r.json().get("candles", []):
@@ -159,7 +175,7 @@ class OandaData:
         return rows
 
     def candles(self, inst, gran, count=300):
-        return _to_df(self._get(inst, {"granularity": gran, "count": count, "price": "M"}))
+        return _to_df(self._get(inst, {"granularity": gran, "count": min(count, 5000), "price": "M"}))
 
     def history(self, inst, gran, days):
         start = datetime.now(timezone.utc) - timedelta(days=days)
@@ -170,10 +186,9 @@ class OandaData:
             if not chunk:
                 break
             rows += chunk
-            last = pd.to_datetime(chunk[-1][0], utc=True)
             if len(chunk) < 5000:
                 break
-            start = last.to_pydatetime() + timedelta(seconds=1)
+            start = pd.to_datetime(chunk[-1][0], utc=True).to_pydatetime() + timedelta(seconds=1)
         return _to_df(rows)
 
 
@@ -189,7 +204,7 @@ class YahooData:
     def _get(self, inst, gran, rng):
         interval = {"M15": "15m", "H1": "60m"}[gran]
         r = self.s.get(self.URL.format(sym=YAHOO_SYMBOLS[inst]),
-                       params={"interval": interval, "range": rng}, timeout=20)
+                       params={"interval": interval, "range": rng}, timeout=30)
         r.raise_for_status()
         res = r.json()["chart"]["result"][0]
         q = res["indicators"]["quote"][0]
@@ -197,9 +212,7 @@ class YahooData:
         rows = []
         for i, ts in enumerate(res.get("timestamp") or []):
             o, h, l, c = q["open"][i], q["high"][i], q["low"][i], q["close"][i]
-            if None in (o, h, l, c):
-                continue
-            if ts + GRAN_SECONDS[gran] > now:      # bar still forming
+            if None in (o, h, l, c) or ts + GRAN_SECONDS[gran] > now:
                 continue
             rows.append((ts, o, h, l, c))
         df = pd.DataFrame(rows, columns=["time", "open", "high", "low", "close"])
@@ -208,18 +221,11 @@ class YahooData:
         return df[~df.index.duplicated(keep="last")].sort_index()
 
     def candles(self, inst, gran, count=300):
-        return self._get(inst, gran, "30d" if gran == "M15" else "90d").tail(count)
+        return self._get(inst, gran, "30d" if gran == "M15" else "200d").tail(count)
 
     def history(self, inst, gran, days):
         days = min(days, 59) if gran == "M15" else min(days, 700)
         return self._get(inst, gran, f"{days}d")
-
-
-def _to_df(rows):
-    df = pd.DataFrame(rows, columns=["time", "open", "high", "low", "close"])
-    df["time"] = pd.to_datetime(df["time"], utc=True)
-    df = df.set_index("time")
-    return df[~df.index.duplicated(keep="last")].sort_index()
 
 
 def make_data(cfg):
@@ -265,26 +271,38 @@ def adx(df, n=14):
     return rma(dx, n)
 
 
-def prepare(m15, h1):
-    """Add indicators to both timeframes and attach the latest *closed* 1H values to each 15m bar."""
-    m = m15.copy()
-    m["ema20"], m["ema50"] = ema(m["close"], 20), ema(m["close"], 50)
-    m["rsi"], m["atr"], m["adx"] = rsi(m["close"]), atr(m), adx(m)
-    m["atr_avg"] = m["atr"].rolling(100).mean()
-    m["close_time"] = m.index + pd.Timedelta(minutes=15)
+def resample(df, rule):
+    return df.resample(rule, label="left", closed="left").agg(
+        {"open": "first", "high": "max", "low": "min", "close": "last"}).dropna()
 
-    h = h1.copy()
-    h["h_ema50"], h["h_ema200"] = ema(h["close"], 50), ema(h["close"], 200)
-    h["h_rsi"] = rsi(h["close"])
-    h["h_close"] = h["close"]
+
+def add_daily(df, d1):
+    """Attach the previous *completed* day's trend values to each bar (no look-ahead)."""
+    d = d1.copy()
+    d["d_ema50"] = ema(d["close"], 50)
+    d["d_ema20"] = ema(d["close"], 20)
+    d["d_close"] = d["close"]
+    d["d_n"] = range(1, len(d) + 1)
+    d["avail"] = d.index + pd.Timedelta(days=1)
+    left = df.reset_index()
+    left = left.rename(columns={left.columns[0]: "time"}).sort_values("time")
+    m = pd.merge_asof(left, d[["avail", "d_ema50", "d_ema20", "d_close", "d_n"]].sort_values("avail"),
+                      left_on="time", right_on="avail", direction="backward")
+    return m.set_index("time")
+
+
+def prepare(h1, cfg):
+    """Add everything the strategy needs to 1-hour candles."""
+    h = add_daily(h1, resample(h1, "1D"))
+    h["atr"] = atr(h)
+    n = cfg["breakout_hours"]
+    h["hh"] = h["high"].rolling(n).max().shift(1)
+    h["ll"] = h["low"].rolling(n).min().shift(1)
     h["close_time"] = h.index + pd.Timedelta(hours=1)
-    h = h.iloc[200:]  # need warm-up for EMA200
-
-    merged = pd.merge_asof(
-        m.reset_index().sort_values("close_time"),
-        h[["close_time", "h_close", "h_ema50", "h_ema200", "h_rsi"]].sort_values("close_time"),
-        on="close_time", direction="backward")
-    return merged.set_index("time")
+    uk = h.index.tz_convert(UK)
+    h["uk_hour"] = uk.hour
+    h["wd"] = uk.weekday
+    return h
 
 
 # --------------------------------------------------------------------------- #
@@ -298,132 +316,94 @@ class Signal:
     time: str            # close time of the trigger candle (UTC ISO)
     entry: float
     sl: float
-    tp: float
-    score: int
-    max_score: int
+    tp1: float
+    tp2: float
+    tp3: float
     reasons: list
     session: str
     # live tracking
-    status: str = "open"           # open / win / loss / breakeven / timeout
-    be_moved: bool = False
+    stop: float = 0.0              # current stop (moves to entry / TP1)
+    hits: int = 0                  # how many TPs hit so far
+    status: str = "open"           # open / tp3 / loss / stopped_at_entry / stopped_at_tp1 / timeout
     result_r: float = 0.0
     risk_gbp: float = 0.0
     lots: float = 0.0
     too_big: bool = False
-    closed_time: str = ""
+    last_seen: str = ""            # last candle processed while tracking
 
 
-def in_session(ts_utc, cfg):
-    t = ts_utc.astimezone(UK)
-    start = datetime.strptime(cfg["session_start_uk"], "%H:%M").time()
-    end = datetime.strptime(cfg["session_end_uk"], "%H:%M").time()
-    if t.weekday() >= 5:
-        return None
-    if not (start <= t.time() <= end):
-        return None
-    if t.hour < 12:
+def session_name(hour):
+    if hour < 12:
         return "London session"
-    if t.hour < 17:
+    if hour < 17:
         return "London/New York overlap"
     return "New York session"
 
 
 def analyse(inst, df, i, cfg):
-    """Look at the closed candle at row i. Return a Signal only if every hard rule passes
-    and the quality score reaches min_quality_score."""
-    if i < 110:
-        return None
+    """Return a Signal if the closed 1-hour candle at row i is a breakout in the daily trend direction."""
     r = df.iloc[i]
-    if pd.isna(r.get("h_ema200")) or pd.isna(r["atr_avg"]):
+    if pd.isna(r["hh"]) or pd.isna(r["d_n"]) or r["d_n"] < 60 or pd.isna(r["atr"]):
         return None
-
-    session = in_session(r["close_time"].to_pydatetime(), cfg)
-    if not session:
+    if r["wd"] >= 5 or not (cfg["session_start_hour_uk"] <= r["uk_hour"] <= cfg["session_end_hour_uk"]):
         return None
-
-    a = r["atr"]
-    # Hard rule: normal volatility (skip dead markets and news spikes)
-    if not (0.6 * r["atr_avg"] <= a <= 2.5 * r["atr_avg"]):
+    up = r["d_close"] > r["d_ema50"] and r["d_ema20"] > r["d_ema50"]
+    down = r["d_close"] < r["d_ema50"] and r["d_ema20"] < r["d_ema50"]
+    if up and r["close"] > r["hh"]:
+        side, sgn = "BUY", 1
+        why = [f"Daily uptrend (above the 50-day average)",
+               f"Broke the {cfg['breakout_hours']}-hour high ({fmt_price(inst, r['hh'])})"]
+    elif down and r["close"] < r["ll"]:
+        side, sgn = "SELL", -1
+        why = [f"Daily downtrend (below the 50-day average)",
+               f"Broke the {cfg['breakout_hours']}-hour low ({fmt_price(inst, r['ll'])})"]
+    else:
         return None
+    entry = float(r["close"])
+    risk = cfg["stop_atr"] * float(r["atr"])
+    t1, t2, t3 = cfg["take_profits_r"]
+    why.append(f"Stop sized to volatility ({cfg['stop_atr']:g}x hourly ATR)")
+    return Signal(inst=inst, side=side, time=r["close_time"].isoformat(), entry=entry,
+                  sl=entry - sgn * risk, tp1=entry + sgn * t1 * risk, tp2=entry + sgn * t2 * risk,
+                  tp3=entry + sgn * t3 * risk, reasons=why, session=session_name(int(r["uk_hour"])),
+                  stop=entry - sgn * risk)
 
-    prev = df.iloc[i - 1]
-    recent = df.iloc[i - 4:i + 1]
-    rr = cfg["reward_to_risk"]
 
-    for side in ("BUY", "SELL"):
-        long = side == "BUY"
-        sgn = 1 if long else -1
+# --------------------------------------------------------------------------- #
+# Following a trade (shared by backtest and live tracking)                     #
+# --------------------------------------------------------------------------- #
 
-        # Hard rule 1: 1-hour trend agrees
-        if long and not (r["h_close"] > r["h_ema200"] and r["h_ema50"] > r["h_ema200"]):
-            continue
-        if not long and not (r["h_close"] < r["h_ema200"] and r["h_ema50"] < r["h_ema200"]):
-            continue
-        # Hard rule 2: 15-minute trend agrees
-        if long and not (r["ema20"] > r["ema50"] and r["close"] > r["ema50"]):
-            continue
-        if not long and not (r["ema20"] < r["ema50"] and r["close"] < r["ema50"]):
-            continue
-        # Hard rule 3: price pulled back to the 20 EMA in the last hour
-        if long and not (recent["low"] <= recent["ema20"] + 0.1 * a).any():
-            continue
-        if not long and not (recent["high"] >= recent["ema20"] - 0.1 * a).any():
-            continue
-        # Hard rule 4: bounce confirmed - candle closes in trend direction beyond prior candle
-        if long and not (r["close"] > r["open"] and r["close"] > r["ema20"] and r["close"] > prev["high"]):
-            continue
-        if not long and not (r["close"] < r["open"] and r["close"] < r["ema20"] and r["close"] < prev["low"]):
-            continue
+def step_trade(sig, bar, cfg):
+    """Advance a trade by one candle. Returns a list of events.
+    If a candle touches the stop, the stop is counted first (conservative)."""
+    sgn = 1 if sig.side == "BUY" else -1
+    risk = abs(sig.entry - sig.sl)
+    tps_r = cfg["take_profits_r"]
+    levels = [sig.tp1, sig.tp2, sig.tp3]
+    stop_hit = bar["low"] <= sig.stop if sgn == 1 else bar["high"] >= sig.stop
+    if stop_hit:
+        sig.result_r += (3 - sig.hits) / 3 * sgn * (sig.stop - sig.entry) / risk
+        sig.status = ["loss", "stopped_at_entry", "stopped_at_tp1"][sig.hits]
+        return [sig.status]
+    events = []
+    while sig.hits < 3 and (bar["high"] >= levels[sig.hits] if sgn == 1 else bar["low"] <= levels[sig.hits]):
+        sig.result_r += tps_r[sig.hits] / 3
+        sig.hits += 1
+        events.append(f"tp{sig.hits}")
+        if sig.hits == 1:
+            sig.stop = sig.entry
+        elif sig.hits == 2:
+            sig.stop = sig.tp1
+    if sig.hits == 3:
+        sig.status = "tp3"
+    return events
 
-        # Stop beyond the pullback swing, take profit at reward_to_risk x risk
-        entry = r["close"]
-        swing = df.iloc[i - 5:i + 1]["low"].min() if long else df.iloc[i - 5:i + 1]["high"].max()
-        sl = swing - sgn * 0.2 * a
-        risk = abs(entry - sl)
-        if risk < 1.0 * a:
-            risk = 1.0 * a
-            sl = entry - sgn * risk
-        if risk > 2.5 * a:            # Hard rule 5: stop would be too wide
-            continue
-        tp = entry + sgn * rr * risk
 
-        # Quality points
-        reasons, score = [], 0
-        reasons.append(f"1H {'uptrend' if long else 'downtrend'} confirmed")
-        reasons.append("Pulled back to the 20 EMA and bounced")
-
-        checks = []
-        checks.append((r["adx"] >= 20, f"Trend strength ADX {r['adx']:.0f}"))
-        if long:
-            checks.append((50 <= r["rsi"] <= 68, f"Momentum healthy (RSI {r['rsi']:.0f})"))
-            checks.append((r["h_rsi"] > 50, f"1H momentum agrees (RSI {r['h_rsi']:.0f})"))
-            checks.append((r["close"] - r["ema50"] <= 1.5 * a, "Not overstretched"))
-        else:
-            checks.append((32 <= r["rsi"] <= 50, f"Momentum healthy (RSI {r['rsi']:.0f})"))
-            checks.append((r["h_rsi"] < 50, f"1H momentum agrees (RSI {r['h_rsi']:.0f})"))
-            checks.append((r["ema50"] - r["close"] <= 1.5 * a, "Not overstretched"))
-        rng = r["high"] - r["low"]
-        checks.append((rng > 0 and abs(r["close"] - r["open"]) >= 0.5 * rng, "Strong confirmation candle"))
-        day = df.iloc[max(0, i - 96):i]
-        if long:
-            blocker = day["high"].max()
-            clear = blocker <= entry or blocker >= tp - 0.25 * risk
-        else:
-            blocker = day["low"].min()
-            clear = blocker >= entry or blocker <= tp + 0.25 * risk
-        checks.append((clear, "Clear path to target (no recent high/low in the way)"))
-
-        for ok, text in checks:
-            if ok:
-                score += 1
-                reasons.append(text)
-        if score < cfg["min_quality_score"]:
-            continue
-
-        return Signal(inst=inst, side=side, time=r["close_time"].isoformat(), entry=float(entry),
-                      sl=float(sl), tp=float(tp), score=score, max_score=len(checks),
-                      reasons=reasons, session=session)
-    return None
+def timeout_trade(sig, price):
+    sgn = 1 if sig.side == "BUY" else -1
+    risk = abs(sig.entry - sig.sl)
+    sig.result_r += (3 - sig.hits) / 3 * sgn * (price - sig.entry) / risk
+    sig.status = "timeout"
 
 
 # --------------------------------------------------------------------------- #
@@ -469,15 +449,16 @@ def size_position(sig, cfg, fx):
     stop = abs(sig.entry - sig.sl)
     risk_per_lot = stop * i["contract"] * fx.to_gbp(i["quote"])
     step = cfg["lot_step"]
-    lots = math.floor(want_risk / risk_per_lot / step) * step
-    lots = max(lots, cfg["min_lot"])
-    lots = round(lots, 2)
+    lots = math.floor(want_risk / risk_per_lot / step + 1e-9) * step
+    lots = round(max(lots, cfg["min_lot"]), 2)
     risk = lots * risk_per_lot
     margin = lots * i["contract"] * fx.to_gbp(i["base"]) / i["leverage"]
-    too_big = risk > bal * cfg["max_risk_percent"] / 100
     cant_open = margin > bal * 0.9
-    return dict(lots=lots, risk=risk, reward=risk * cfg["reward_to_risk"], margin=margin,
-                risk_pct=100 * risk / bal, too_big=too_big or cant_open, cant_open=cant_open)
+    too_big = risk > bal * cfg["max_risk_percent"] / 100 or cant_open
+    avg_r = sum(cfg["take_profits_r"]) / 3
+    return dict(lots=lots, risk=risk, full_target=risk * avg_r, margin=margin,
+                risk_pct=100 * risk / bal, too_big=too_big, cant_open=cant_open,
+                can_split=lots >= 3 * step - 1e-9)
 
 
 # --------------------------------------------------------------------------- #
@@ -488,7 +469,7 @@ class Discord:
     def __init__(self, url, dry_run=False):
         self.url, self.dry = url, dry_run
         if not dry_run and (not url or url.startswith("PASTE")):
-            sys.exit("Add your Discord webhook URL to config.json (see README).")
+            sys.exit("Add your Discord webhook URL (see README).")
 
     def send(self, content=None, embed=None):
         payload = {"username": "Gold & FX Signals"}
@@ -524,144 +505,126 @@ def signal_embed(sig, size, cfg):
     long = sig.side == "BUY"
     risk = abs(sig.entry - sig.sl)
     chase = sig.entry + (1 if long else -1) * 0.3 * risk
-    colour = 0x2ECC71 if long else 0xE74C3C
+    p = lambda x: fmt_price(sig.inst, x)  # noqa: E731
+    t1, t2, t3 = cfg["take_profits_r"]
+    desc = (f"**Entry:** {p(sig.entry)}\n"
+            f"**SL:** {p(sig.sl)}  ({fmt_distance(sig.inst, risk)})\n"
+            f"**TP1:** {p(sig.tp1)}  ({fmt_distance(sig.inst, t1 * risk)})\n"
+            f"**TP2:** {p(sig.tp2)}  ({fmt_distance(sig.inst, t2 * risk)})\n"
+            f"**TP3:** {p(sig.tp3)}  ({fmt_distance(sig.inst, t3 * risk)})")
     fields = [
-        {"name": "Entry (now)", "value": fmt_price(sig.inst, sig.entry), "inline": True},
-        {"name": "Stop loss", "value": f"{fmt_price(sig.inst, sig.sl)}\n({fmt_distance(sig.inst, risk)})", "inline": True},
-        {"name": "Take profit", "value": f"{fmt_price(sig.inst, sig.tp)}\n({fmt_distance(sig.inst, risk * cfg['reward_to_risk'])})", "inline": True},
         {"name": "Size", "value": f"{size['lots']:.2f} lots", "inline": True},
-        {"name": "Risk / target", "value": f"£{size['risk']:.2f} ({size['risk_pct']:.1f}%) / £{size['reward']:.2f}", "inline": True},
-        {"name": "Margin needed", "value": f"~£{size['margin']:.0f}", "inline": True},
+        {"name": "Risk", "value": f"£{size['risk']:.2f} ({size['risk_pct']:.1f}%)", "inline": True},
+        {"name": "If all TPs hit", "value": f"+£{size['full_target']:.2f}", "inline": True},
+        {"name": "Plan", "value": "Close ⅓ at each TP · SL to entry at TP1 · SL to TP1 at TP2", "inline": False},
         {"name": "Why", "value": "\n".join(f"✓ {x}" for x in sig.reasons), "inline": False},
-        {"name": "Don't chase", "value": f"Skip it if price is already past {fmt_price(sig.inst, chase)}", "inline": False},
+        {"name": "Don't chase", "value": f"Skip if price is already past {p(chase)}", "inline": False},
     ]
+    colour = 0x2ECC71 if long else 0xE74C3C
     if size["cant_open"]:
         colour = 0xF39C12
         fields.insert(0, {"name": "⚠️ Too big for your account",
                           "value": f"The smallest size ({cfg['min_lot']} lots) needs ~£{size['margin']:.0f} margin. "
-                                   f"Demo/watch only.", "inline": False})
+                                   "Demo/watch only.", "inline": False})
     elif size["too_big"]:
         colour = 0xF39C12
         fields.insert(0, {"name": "⚠️ Too risky for your account",
                           "value": f"Even the smallest size risks £{size['risk']:.2f} ({size['risk_pct']:.0f}%). "
-                                   f"Demo/watch only.", "inline": False})
+                                   "Demo/watch only.", "inline": False})
+    elif not size["can_split"]:
+        fields.insert(3, {"name": "Small size", "value": "Can't split into thirds at this size. "
+                          "Use the plan on a demo with 0.03 lots, or hold all of it and follow the SL moves.",
+                          "inline": False})
     return {
-        "title": f"{'🟢 BUY' if long else '🔴 SELL'} {i['name']}",
-        "description": f"Quality **{sig.score}/{sig.max_score}** · {sig.session}",
+        "title": f"{'🟢' if long else '🔴'} {i['name']} {sig.side} NOW",
+        "description": desc,
         "color": colour,
         "fields": fields,
-        "footer": {"text": f"Move stop to entry at +{cfg['move_to_breakeven_at_r']:g}R · Not financial advice"},
+        "footer": {"text": f"{sig.session} · Not financial advice"},
         "timestamp": sig.time,
     }
 
 
-# --------------------------------------------------------------------------- #
-# Trade outcome simulation (used by backtest and live tracking)                #
-# --------------------------------------------------------------------------- #
-
-def step_trade(sig, bar, cfg):
-    """Advance a trade by one candle. Returns an event string or None.
-    Conservative: if a candle touches both stop and target, count the stop."""
-    long = sig.side == "BUY"
-    risk = abs(sig.entry - sig.sl)
-    stop = sig.entry if sig.be_moved else sig.sl
-    hit_stop = bar["low"] <= stop if long else bar["high"] >= stop
-    hit_tp = bar["high"] >= sig.tp if long else bar["low"] <= sig.tp
-    be_level = sig.entry + (1 if long else -1) * cfg["move_to_breakeven_at_r"] * risk
-    hit_be = bar["high"] >= be_level if long else bar["low"] <= be_level
-
-    if hit_stop:
-        if sig.be_moved:
-            sig.status, sig.result_r = "breakeven", 0.0
-        else:
-            sig.status, sig.result_r = "loss", -1.0
-        return sig.status
-    if hit_tp:
-        sig.status, sig.result_r = "win", cfg["reward_to_risk"]
-        return "win"
-    if hit_be and not sig.be_moved and cfg["move_to_breakeven_at_r"] > 0:
-        sig.be_moved = True
-        return "breakeven_move"
-    return None
-
-
-def timeout_trade(sig, price):
-    long = sig.side == "BUY"
-    risk = abs(sig.entry - sig.sl)
-    sig.result_r = ((price - sig.entry) if long else (sig.entry - price)) / risk
-    sig.status = "timeout"
+def event_message(sig, ev, cfg):
+    tag = f"**{info(sig.inst)['name']} {sig.side}**"
+    p = lambda x: fmt_price(sig.inst, x)  # noqa: E731
+    gbp = sig.risk_gbp * sig.result_r
+    money = f" (~{'+' if gbp >= 0 else '-'}£{abs(gbp):.2f})" if sig.risk_gbp else ""
+    return {
+        "tp1": f"✅ {tag} TP1 hit ({p(sig.tp1)}). Close ⅓ and move your SL to entry ({p(sig.entry)}). The rest is now risk-free.",
+        "tp2": f"✅✅ {tag} TP2 hit ({p(sig.tp2)}). Close another ⅓ and move your SL to TP1 ({p(sig.tp1)}).",
+        "tp3": f"🎯 {tag} TP3 hit ({p(sig.tp3)}). Trade complete: {sig.result_r:+.1f}R{money}.",
+        "loss": f"❌ {tag} SL hit: {sig.result_r:+.1f}R{money}. Losses are part of it, stick to the plan.",
+        "stopped_at_entry": f"➖ {tag} came back to entry after TP1. Closed: {sig.result_r:+.1f}R{money}.",
+        "stopped_at_tp1": f"✅ {tag} stopped at TP1 after TP2. Closed: {sig.result_r:+.1f}R{money}.",
+    }[ev]
 
 
 # --------------------------------------------------------------------------- #
 # Backtest                                                                     #
 # --------------------------------------------------------------------------- #
 
-def backtest(cfg, data=None, quiet=False):
-    data = data or make_data(cfg)
-    days = cfg["backtest_days"]
-    all_trades = []
-    print(f"Backtesting the last ~{days} days (15-minute candles). This can take a minute...\n")
-    for inst in cfg["instruments"]:
-        m15 = data.history(inst, "M15", days)
-        h1 = data.history(inst, "H1", days + 20)
-        if len(m15) < 300 or len(h1) < 260:
-            print(f"{inst}: not enough data, skipped")
-            continue
-        df = prepare(m15, h1)
-        trades = run_signals_over(inst, df, cfg)
-        all_trades += trades
-        if not quiet:
-            summarise(trades, f"{info(inst)['name']}", cfg)
-    print()
-    summarise(all_trades, "ALL MARKETS", cfg, detail=True)
-    return all_trades
-
-
 def run_signals_over(inst, df, cfg):
-    trades, open_until = [], -1
+    """Walk through history: one trade at a time, entry at the next candle's open."""
+    trades, busy = [], -1
     spread = info(inst)["spread"]
-    per_day = {}
-    last_sig_time = None
-    max_bars = int(cfg["max_trade_hours"] * 4)
+    hold = int(cfg["max_trade_hours"])
     for i in range(len(df) - 1):
-        if i <= open_until:
+        if i <= busy:
             continue
         sig = analyse(inst, df, i, cfg)
         if not sig:
             continue
-        t = df.iloc[i]["close_time"]
-        day = t.astimezone(UK).date()
-        if per_day.get(day, 0) >= cfg["max_signals_per_day"]:
-            continue
-        if last_sig_time is not None and t - last_sig_time < pd.Timedelta(hours=cfg["cooldown_hours_per_instrument"]):
-            continue
-        per_day[day] = per_day.get(day, 0) + 1
-        last_sig_time = t
+        # enter at the next candle's open, keep the same distances
+        shift = float(df.iloc[i + 1]["open"]) - sig.entry
+        for k in ("entry", "sl", "tp1", "tp2", "tp3", "stop"):
+            setattr(sig, k, getattr(sig, k) + shift)
         j = i + 1
-        while j < len(df) and j <= i + max_bars:
-            if step_trade(sig, df.iloc[j], cfg) in ("win", "loss", "breakeven"):
+        while j < len(df) and j <= i + hold:
+            step_trade(sig, df.iloc[j], cfg)
+            if sig.status != "open":
                 break
             j += 1
         if sig.status == "open":
-            if j > i + max_bars and i + max_bars < len(df):
-                timeout_trade(sig, df.iloc[i + max_bars]["close"])
-            else:
-                continue  # still running at end of data - ignore
-        sig.result_r -= spread / abs(sig.entry - sig.sl)   # pay the spread
-        sig.closed_time = df.index[min(j, len(df) - 1)].isoformat()
+            if i + hold >= len(df):
+                continue  # still running at the end of the data
+            timeout_trade(sig, float(df.iloc[i + hold]["close"]))
+            j = i + hold
+        sig.result_r -= spread / abs(sig.entry - sig.sl)
         trades.append(sig)
-        open_until = j
+        busy = j
     return trades
+
+
+def backtest(cfg, data=None):
+    data = data or make_data(cfg)
+    days = cfg["backtest_days"]
+    print(f"Backtesting the last ~{days} days (1-hour candles)...\n")
+    all_trades = []
+    for inst in cfg["instruments"]:
+        h1 = data.history(inst, "H1", days + 120)   # extra for the 50-day trend warm-up
+        if len(h1) < 2000:
+            print(f"{info(inst)['name']}: not enough data, skipped")
+            continue
+        df = prepare(h1, cfg)
+        start = df.index[-1] - pd.Timedelta(days=days)
+        trades = [t for t in run_signals_over(inst, df, cfg) if pd.Timestamp(t.time) >= start]
+        all_trades += trades
+        summarise(trades, info(inst)["name"], cfg)
+    print()
+    all_trades.sort(key=lambda t: t.time)
+    summarise(all_trades, "ALL MARKETS", cfg, detail=True)
+    return all_trades
 
 
 def summarise(trades, label, cfg, detail=False):
     if not trades:
-        print(f"{label:<14} no signals")
+        print(f"{label}: no signals")
         return
     rs = [t.result_r for t in trades]
-    wins = sum(1 for t in trades if t.status == "win")
-    losses = sum(1 for t in trades if t.status == "loss")
-    other = len(trades) - wins - losses
+    wins = sum(1 for r in rs if r > 0.05)
+    losses = sum(1 for r in rs if r < -0.05)
+    other = len(rs) - wins - losses
     total = sum(rs)
     gross_win = sum(r for r in rs if r > 0)
     gross_loss = -sum(r for r in rs if r < 0)
@@ -671,10 +634,11 @@ def summarise(trades, label, cfg, detail=False):
         cum += r
         peak = max(peak, cum)
         dd = max(dd, peak - cum)
-    risk_gbp = cfg["account_balance_gbp"] * cfg["risk_percent"] / 100
-    print(f"{label}: {len(trades)} signals ({wins}W {losses}L {other} even)\n"
+    full = sum(1 for t in trades if t.status == "tp3")
+    print(f"{label}: {len(trades)} signals ({wins}W {losses}L {other} even, {full} hit TP3)\n"
           f"  won {100 * wins / len(trades):.0f}% | {total:+.1f}R | PF {pf:.2f} | dip {dd:.1f}R")
     if detail:
+        risk_gbp = cfg["account_balance_gbp"] * cfg["risk_percent"] / 100
         weeks = max(1, (pd.Timestamp(trades[-1].time) - pd.Timestamp(trades[0].time)).days / 7)
         print(f"\nAbout {len(trades) / weeks:.1f} signals a week.")
         print(f"At £{risk_gbp:.2f} risk per trade: {'+' if total >= 0 else '-'}£{abs(total * risk_gbp):.2f} total,")
@@ -691,8 +655,11 @@ def summarise(trades, label, cfg, detail=False):
 def load_state():
     if STATE_FILE.exists():
         s = json.loads(STATE_FILE.read_text())
-        s["open"] = [Signal(**x) for x in s.get("open", [])]
-        s["closed"] = [Signal(**x) for x in s.get("closed", [])]
+        known = set(Signal.__dataclass_fields__)
+        s["open"] = [Signal(**{k: v for k, v in x.items() if k in known}) for x in s.get("open", []) if "tp1" in x]
+        s["closed"] = [Signal(**{k: v for k, v in x.items() if k in known}) for x in s.get("closed", []) if "tp1" in x]
+        s.setdefault("last_bar", {})
+        s.setdefault("sent_per_day", {})
         return s
     return {"open": [], "closed": [], "last_bar": {}, "last_summary": "", "sent_per_day": {}}
 
@@ -712,42 +679,32 @@ def market_closed(now_utc):
     return wd == 5 or (wd == 4 and h >= 22) or (wd == 6 and h < 21)
 
 
-def manage_open(state, frames, discord, cfg):
+def manage_open(state, data, discord, cfg):
+    """Follow open trades on 15-minute candles and post updates."""
     still_open = []
     for sig in state["open"]:
-        df = frames.get(sig.inst)
-        if df is None:
-            still_open.append(sig)
-            continue
-        name = info(sig.inst)["name"]
-        last_seen = pd.Timestamp(sig.closed_time or sig.time)
-        bars = df[df["close_time"] > last_seen]
-        done = False
+        m15 = data.candles(sig.inst, "M15", 400)
+        m15 = m15.assign(close_time=m15.index + pd.Timedelta(minutes=15))
+        bars = m15[m15["close_time"] > pd.Timestamp(sig.last_seen or sig.time)]
         for _, bar in bars.iterrows():
-            ev = step_trade(sig, bar, cfg)
-            sig.closed_time = bar["close_time"].isoformat()
-            if ev == "breakeven_move":
-                discord.send(content=f"🛡️ **{name} {sig.side}** is up {cfg['move_to_breakeven_at_r']:g}R - "
-                                     f"move your stop loss to entry ({fmt_price(sig.inst, sig.entry)}) so it can't lose.")
-            elif ev in ("win", "loss", "breakeven"):
-                msg = {"win": f"✅ **{name} {sig.side}** hit take profit: +{sig.result_r:g}R (~+£{sig.risk_gbp * sig.result_r:.2f})",
-                       "loss": f"❌ **{name} {sig.side}** hit stop loss: -1R (~-£{sig.risk_gbp:.2f}). Part of the game - stick to the plan.",
-                       "breakeven": f"➖ **{name} {sig.side}** came back to entry after the stop was moved: 0R, no loss."}[ev]
-                discord.send(content=msg)
-                done = True
+            events = step_trade(sig, bar, cfg)
+            sig.last_seen = bar["close_time"].isoformat()
+            for ev in events:
+                discord.send(content=event_message(sig, ev, cfg))
+            if sig.status != "open":
                 break
-        if not done and sig.status == "open":
-            age = df["close_time"].iloc[-1] - pd.Timestamp(sig.time)
+        if sig.status == "open" and len(m15):
+            age = m15["close_time"].iloc[-1] - pd.Timestamp(sig.time)
             if age > pd.Timedelta(hours=cfg["max_trade_hours"]):
-                price = float(df["close"].iloc[-1])
+                price = float(m15["close"].iloc[-1])
                 timeout_trade(sig, price)
-                discord.send(content=f"⏱️ **{name} {sig.side}** has been open {cfg['max_trade_hours']}h - close it now at market "
-                                     f"(~{fmt_price(sig.inst, price)}, {sig.result_r:+.1f}R).")
-                done = True
-        if done:
-            state["closed"].append(sig)
-        else:
+                discord.send(content=f"⏱️ **{info(sig.inst)['name']} {sig.side}** has been open "
+                                     f"{cfg['max_trade_hours']}h. Close what's left at market "
+                                     f"(~{fmt_price(sig.inst, price)}). Result {sig.result_r:+.1f}R.")
+        if sig.status == "open":
             still_open.append(sig)
+        else:
+            state["closed"].append(sig)
     state["open"] = still_open
 
 
@@ -759,14 +716,16 @@ def weekly_summary(state, discord, cfg, force=False):
         return
     trades = [t for t in state["closed"] if pd.Timestamp(t.time) >= pd.Timestamp(week_start)]
     if trades:
-        wins = sum(t.status == "win" for t in trades)
-        losses = sum(t.status == "loss" for t in trades)
+        wins = sum(t.result_r > 0.05 for t in trades)
+        losses = sum(t.result_r < -0.05 for t in trades)
         r = sum(t.result_r for t in trades)
         gbp = sum(t.result_r * t.risk_gbp for t in trades)
-        text = (f"📊 **Week summary** - {len(trades)} signals: {wins} won, {losses} lost, "
-                f"{len(trades) - wins - losses} breakeven/timed out. Total {r:+.1f}R (~{'+' if gbp >= 0 else '-'}£{abs(gbp):.2f}).")
+        text = (f"📊 **Week summary**: {len(trades)} trades, {wins} won, {losses} lost, "
+                f"{len(trades) - wins - losses} even. Total {r:+.1f}R (~{'+' if gbp >= 0 else '-'}£{abs(gbp):.2f}).")
     else:
-        text = "📊 **Week summary** - no signals this week. No great setups = no trades, which is the point."
+        text = "📊 **Week summary**: no closed trades this week."
+    if state["open"]:
+        text += f" Still open: {', '.join(info(s.inst)['name'] + ' ' + s.side for s in state['open'])}."
     discord.send(content=text)
     state["last_summary"] = key
 
@@ -774,23 +733,17 @@ def weekly_summary(state, discord, cfg, force=False):
 def one_pass(state, data, discord, fx, cfg, now=None):
     """Fetch prices once, update open trades, and send any new signals."""
     now = pd.Timestamp(datetime.now(timezone.utc) if now is None else now)
-    frames = {}
-    for inst in cfg["instruments"]:
-        m15 = data.candles(inst, "M15", 400)
-        h1 = data.candles(inst, "H1", 400)
-        frames[inst] = prepare(m15, h1)
-
-    manage_open(state, frames, discord, cfg)
+    manage_open(state, data, discord, cfg)
 
     today = now.tz_convert(UK).date().isoformat()
-    for inst, df in frames.items():
+    for inst in cfg["instruments"]:
+        df = prepare(data.candles(inst, "H1", 3000), cfg)
         last = state["last_bar"].get(inst)
         state["last_bar"][inst] = df.index[-1].isoformat()
-        # Check every candle closed since the last check (catches up if a run was late or skipped)
         if last is None:
             rows = [len(df) - 1]
         else:
-            rows = [i for i in range(max(0, len(df) - 6), len(df)) if df.index[i] > pd.Timestamp(last)]
+            rows = [i for i in range(max(0, len(df) - 3), len(df)) if df.index[i] > pd.Timestamp(last)]
         for i in rows:
             sig = analyse(inst, df, i, cfg)
             if not sig:
@@ -798,26 +751,24 @@ def one_pass(state, data, discord, fx, cfg, now=None):
             if now - pd.Timestamp(sig.time) > pd.Timedelta(minutes=cfg["max_signal_age_minutes"]):
                 print(f"{inst}: signal skipped - found too late, price has likely moved")
                 continue
+            if any(o.inst == inst for o in state["open"]):
+                print(f"{inst}: signal skipped - a trade on it is already open")
+                continue
             if state["sent_per_day"].get(today, 0) >= cfg["max_signals_per_day"]:
                 print(f"{inst}: signal skipped - daily limit reached")
-                continue
-            if any(o.inst == inst for o in state["open"]):
-                continue
-            recent = [c for c in state["closed"] if c.inst == inst]
-            if recent and pd.Timestamp(sig.time) - pd.Timestamp(recent[-1].time) < pd.Timedelta(hours=cfg["cooldown_hours_per_instrument"]):
                 continue
             size = size_position(sig, cfg, fx)
             sig.lots, sig.risk_gbp, sig.too_big = size["lots"], size["risk"], size["too_big"]
             if size["too_big"] and not cfg["send_signals_too_big_for_account"]:
                 print(f"{inst}: signal skipped - too big for account")
                 continue
+            sig.last_seen = sig.time
             discord.send(content="@here" if not size["too_big"] else None, embed=signal_embed(sig, size, cfg))
             state["open"].append(sig)
             state["sent_per_day"][today] = state["sent_per_day"].get(today, 0) + 1
-            print(f"{sig.side} {inst} sent (quality {sig.score}/{sig.max_score})")
+            print(f"{sig.side} {inst} sent")
             break
 
-    # keep the state file small
     state["closed"] = state["closed"][-500:]
     state["sent_per_day"] = dict(sorted(state["sent_per_day"].items())[-14:])
     weekly_summary(state, discord, cfg)
@@ -830,8 +781,7 @@ def run(cfg, dry_run=False, data=None):
     fx = FX(data)
     state = load_state()
     names = ", ".join(info(x)["name"] for x in cfg["instruments"])
-    discord.send(content=f"🤖 Signal bot online - watching {names} on the 15-minute chart. "
-                         f"Only pings for quality {cfg['min_quality_score']}+ setups, max {cfg['max_signals_per_day']} a day.")
+    discord.send(content=f"🤖 Signal bot online, watching {names}.")
     print(f"Watching {names}. Press Ctrl+C to stop.")
     errors = 0
     while True:
@@ -879,8 +829,20 @@ def check(cfg, dry_run=False, data=None, now=None):
 
 def stats(cfg):
     state = load_state()
-    print(f"Open signals: {len(state['open'])}")
+    print(f"Open trades: {len(state['open'])}")
     summarise(state["closed"], "Live results", cfg, detail=bool(state["closed"]))
+
+
+def post_long(discord, title, text):
+    """Send long text to Discord in code blocks under the 2000-character limit."""
+    lines = [l for l in text.splitlines() if not l.startswith("Backtesting")]
+    chunk = title + "\n```"
+    for line in lines:
+        if len(chunk) + len(line) > 1900:
+            discord.send(content=chunk + "```")
+            chunk = "```"
+        chunk += "\n" + line
+    discord.send(content=chunk + "```")
 
 
 def main():
@@ -909,18 +871,6 @@ def main():
         print("Sent. Check Discord.")
     else:
         print(__doc__)
-
-
-def post_long(discord, title, text):
-    """Send long text to Discord in code blocks under the 2000-character limit."""
-    lines = [l for l in text.splitlines() if not l.startswith("Backtesting")]
-    chunk = title + "\n```"
-    for line in lines:
-        if len(chunk) + len(line) > 1900:
-            discord.send(content=chunk + "```")
-            chunk = "```"
-        chunk += "\n" + line
-    discord.send(content=chunk + "```")
 
 
 if __name__ == "__main__":
