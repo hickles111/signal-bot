@@ -6,6 +6,9 @@ on:
       days:
         description: "Days of history"
         default: "730"
+      script:
+        description: "Research script"
+        default: "research.py"
 
 permissions:
   contents: write
@@ -27,7 +30,7 @@ jobs:
           DAYS: ${{ inputs.days }}
         run: |
           set -o pipefail
-          python tools/research.py 2>&1 | tee research_log.txt
+          python tools/${{ inputs.script }} 2>&1 | tee research_log.txt
       - name: Save results to the research branch
         if: always()
         run: |
