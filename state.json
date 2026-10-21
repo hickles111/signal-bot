@@ -36,6 +36,6 @@
   "sent_per_day": {
     "2026-10-20": 1
   },
-  "errors": 0,
-  "last_error": "2026-10-21 18:22 UTC: HTTPError('504 Server Error: Gateway Timeout for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?granularity=H1&count=3000&price=M')"
+  "errors": 1,
+  "last_error": "2026-10-21 19:33 UTC: HTTPError('504 Server Error: Gateway Timeout for url: https://api-fxpractice.oanda.com/v3/instruments/XAU_USD/candles?granularity=H1&count=3000&price=M')"
 }
