@@ -1,5 +1,78 @@
 {
-  "open": [],
+  "open": [
+    {
+      "inst": "XAU_USD",
+      "side": "SELL",
+      "time": "2026-10-22T12:00:00+00:00",
+      "entry": 4059.715,
+      "sl": 4089.8170985859565,
+      "tp1": 4014.5618521210654,
+      "tp2": 3969.408704242131,
+      "tp3": 3924.2555563631963,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (4,066.80)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 4089.8170985859565,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 22.50624193342531,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-10-22T12:00:00+00:00"
+    },
+    {
+      "inst": "XAG_USD",
+      "side": "SELL",
+      "time": "2026-10-22T12:00:00+00:00",
+      "entry": 55.747,
+      "sl": 56.457998625494525,
+      "tp1": 54.68050206175822,
+      "tp2": 53.61400412351643,
+      "tp3": 52.54750618527465,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (55.789)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 56.457998625494525,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 26.57938786895423,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-10-22T12:00:00+00:00"
+    },
+    {
+      "inst": "EUR_USD",
+      "side": "SELL",
+      "time": "2026-10-22T12:00:00+00:00",
+      "entry": 1.11984,
+      "sl": 1.122301415060965,
+      "tp1": 1.1161478774085525,
+      "tp2": 1.1124557548171052,
+      "tp3": 1.1087636322256578,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (1.12063)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 1.122301415060965,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 1.840310325955124,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-10-22T12:00:00+00:00"
+    }
+  ],
   "closed": [
     {
       "inst": "XAU_USD",
@@ -27,14 +100,15 @@
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-10-22T10:00:00+00:00",
-    "EUR_USD": "2026-10-22T10:00:00+00:00",
-    "GBP_USD": "2026-10-22T10:00:00+00:00",
-    "XAG_USD": "2026-10-22T10:00:00+00:00"
+    "XAU_USD": "2026-10-22T11:00:00+00:00",
+    "EUR_USD": "2026-10-22T11:00:00+00:00",
+    "GBP_USD": "2026-10-22T11:00:00+00:00",
+    "XAG_USD": "2026-10-22T11:00:00+00:00"
   },
   "last_summary": "",
   "sent_per_day": {
-    "2026-10-20": 1
+    "2026-10-20": 1,
+    "2026-10-22": 3
   },
   "errors": 0,
   "last_error": "2026-10-21 19:33 UTC: HTTPError('504 Server Error: Gateway Timeout for url: https://api-fxpractice.oanda.com/v3/instruments/XAU_USD/candles?granularity=H1&count=3000&price=M')"
