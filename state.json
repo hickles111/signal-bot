@@ -22,7 +22,7 @@
       "risk_gbp": 26.57938786895423,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-10-22T13:30:00+00:00"
+      "last_seen": "2026-10-22T14:30:00+00:00"
     },
     {
       "inst": "EUR_USD",
@@ -46,7 +46,31 @@
       "risk_gbp": 1.840310325955124,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-10-22T13:30:00+00:00"
+      "last_seen": "2026-10-22T14:30:00+00:00"
+    },
+    {
+      "inst": "XAU_USD",
+      "side": "SELL",
+      "time": "2026-10-22T14:00:00+00:00",
+      "entry": 4056.985,
+      "sl": 4092.185636025646,
+      "tp1": 4004.184045961531,
+      "tp2": 3951.383091923062,
+      "tp3": 3898.5821378845926,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (4,057.55)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 4092.185636025646,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 26.341077888595688,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-10-22T14:00:00+00:00"
     }
   ],
   "closed": [
@@ -100,16 +124,16 @@
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-10-22T12:00:00+00:00",
-    "EUR_USD": "2026-10-22T12:00:00+00:00",
-    "GBP_USD": "2026-10-22T12:00:00+00:00",
-    "XAG_USD": "2026-10-22T12:00:00+00:00"
+    "XAU_USD": "2026-10-22T13:00:00+00:00",
+    "EUR_USD": "2026-10-22T13:00:00+00:00",
+    "GBP_USD": "2026-10-22T13:00:00+00:00",
+    "XAG_USD": "2026-10-22T13:00:00+00:00"
   },
   "last_summary": "",
   "sent_per_day": {
     "2026-10-20": 1,
-    "2026-10-22": 3
+    "2026-10-22": 4
   },
-  "errors": 1,
+  "errors": 0,
   "last_error": "2026-10-22 14:08 UTC: HTTPError('504 Server Error: Gateway Timeout for url: https://api-fxpractice.oanda.com/v3/instruments/XAG_USD/candles?granularity=M15&count=400&price=M')"
 }
