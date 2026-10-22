@@ -15,38 +15,14 @@
         "Stop sized to volatility (2x hourly ATR)"
       ],
       "session": "London/New York overlap",
-      "stop": 56.457998625494525,
-      "hits": 0,
+      "stop": 55.747,
+      "hits": 1,
       "status": "open",
-      "result_r": 0.0,
+      "result_r": 0.5,
       "risk_gbp": 26.57938786895423,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-10-22T16:30:00+00:00"
-    },
-    {
-      "inst": "EUR_USD",
-      "side": "SELL",
-      "time": "2026-10-22T12:00:00+00:00",
-      "entry": 1.11984,
-      "sl": 1.122301415060965,
-      "tp1": 1.1161478774085525,
-      "tp2": 1.1124557548171052,
-      "tp3": 1.1087636322256578,
-      "reasons": [
-        "Daily downtrend (below the 50-day average)",
-        "Broke the 48-hour low (1.12063)",
-        "Stop sized to volatility (2x hourly ATR)"
-      ],
-      "session": "London/New York overlap",
-      "stop": 1.122301415060965,
-      "hits": 0,
-      "status": "open",
-      "result_r": 0.0,
-      "risk_gbp": 1.840310325955124,
-      "lots": 0.01,
-      "too_big": true,
-      "last_seen": "2026-10-22T16:30:00+00:00"
+      "last_seen": "2026-10-22T17:00:00+00:00"
     },
     {
       "inst": "XAU_USD",
@@ -70,7 +46,7 @@
       "risk_gbp": 26.341077888595688,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-10-22T16:30:00+00:00"
+      "last_seen": "2026-10-22T17:00:00+00:00"
     }
   ],
   "closed": [
@@ -121,13 +97,37 @@
       "lots": 0.01,
       "too_big": true,
       "last_seen": "2026-10-22T13:00:00+00:00"
+    },
+    {
+      "inst": "EUR_USD",
+      "side": "SELL",
+      "time": "2026-10-22T12:00:00+00:00",
+      "entry": 1.11984,
+      "sl": 1.122301415060965,
+      "tp1": 1.1161478774085525,
+      "tp2": 1.1124557548171052,
+      "tp3": 1.1087636322256578,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (1.12063)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 1.122301415060965,
+      "hits": 0,
+      "status": "loss",
+      "result_r": -1.0,
+      "risk_gbp": 1.840310325955124,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-10-22T16:45:00+00:00"
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-10-22T15:00:00+00:00",
-    "EUR_USD": "2026-10-22T15:00:00+00:00",
-    "GBP_USD": "2026-10-22T15:00:00+00:00",
-    "XAG_USD": "2026-10-22T15:00:00+00:00"
+    "XAU_USD": "2026-10-22T16:00:00+00:00",
+    "EUR_USD": "2026-10-22T16:00:00+00:00",
+    "GBP_USD": "2026-10-22T16:00:00+00:00",
+    "XAG_USD": "2026-10-22T16:00:00+00:00"
   },
   "last_summary": "",
   "sent_per_day": {
