@@ -1,54 +1,5 @@
 {
-  "open": [
-    {
-      "inst": "EUR_USD",
-      "side": "SELL",
-      "time": "2026-10-27T08:00:00+00:00",
-      "entry": 1.11606,
-      "sl": 1.1176883660413517,
-      "tp1": 1.1136174509379726,
-      "tp2": 1.1111749018759454,
-      "tp3": 1.108732352813918,
-      "reasons": [
-        "Daily downtrend (below the 50-day average)",
-        "Broke the 48-hour low (1.11607)",
-        "Stop sized to volatility (2x hourly ATR)"
-      ],
-      "session": "London session",
-      "stop": 1.11606,
-      "hits": 1,
-      "status": "open",
-      "result_r": 0.5,
-      "risk_gbp": 1.222185058882595,
-      "lots": 0.01,
-      "too_big": false,
-      "last_seen": "2026-10-28T18:00:00+00:00"
-    },
-    {
-      "inst": "GBP_USD",
-      "side": "SELL",
-      "time": "2026-10-27T08:00:00+00:00",
-      "entry": 1.3325,
-      "sl": 1.3344038422930935,
-      "tp1": 1.3296442365603598,
-      "tp2": 1.3267884731207196,
-      "tp3": 1.3239327096810791,
-      "reasons": [
-        "Daily downtrend (below the 50-day average)",
-        "Broke the 48-hour low (1.33258)",
-        "Stop sized to volatility (2x hourly ATR)"
-      ],
-      "session": "London session",
-      "stop": 1.3325,
-      "hits": 1,
-      "status": "open",
-      "result_r": 0.5,
-      "risk_gbp": 1.4289462848022898,
-      "lots": 0.01,
-      "too_big": false,
-      "last_seen": "2026-10-28T18:00:00+00:00"
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "inst": "XAU_USD",
@@ -169,6 +120,54 @@
       "lots": 0.01,
       "too_big": true,
       "last_seen": "2026-10-25T22:15:00+00:00"
+    },
+    {
+      "inst": "EUR_USD",
+      "side": "SELL",
+      "time": "2026-10-27T08:00:00+00:00",
+      "entry": 1.11606,
+      "sl": 1.1176883660413517,
+      "tp1": 1.1136174509379726,
+      "tp2": 1.1111749018759454,
+      "tp3": 1.108732352813918,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (1.11607)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 1.11606,
+      "hits": 1,
+      "status": "stopped_at_entry",
+      "result_r": 0.5,
+      "risk_gbp": 1.222185058882595,
+      "lots": 0.01,
+      "too_big": false,
+      "last_seen": "2026-10-28T18:45:00+00:00"
+    },
+    {
+      "inst": "GBP_USD",
+      "side": "SELL",
+      "time": "2026-10-27T08:00:00+00:00",
+      "entry": 1.3325,
+      "sl": 1.3344038422930935,
+      "tp1": 1.3296442365603598,
+      "tp2": 1.3267884731207196,
+      "tp3": 1.3239327096810791,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (1.33258)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 1.3325,
+      "hits": 1,
+      "status": "stopped_at_entry",
+      "result_r": 0.5,
+      "risk_gbp": 1.4289462848022898,
+      "lots": 0.01,
+      "too_big": false,
+      "last_seen": "2026-10-28T18:45:00+00:00"
     }
   ],
   "last_bar": {
