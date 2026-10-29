@@ -1,5 +1,30 @@
 {
-  "open": [],
+  "open": [
+    {
+      "inst": "XAG_USD",
+      "side": "SELL",
+      "time": "2026-10-29T12:00:00+00:00",
+      "entry": 52.38,
+      "sl": 53.36449551315071,
+      "tp1": 50.903256730273945,
+      "tp2": 49.42651346054788,
+      "tp3": 47.94977019082182,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (52.482)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 53.36449551315071,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 36.95498240081624,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-10-29T12:00:00+00:00"
+    }
+  ],
   "closed": [
     {
       "inst": "XAU_USD",
@@ -171,16 +196,17 @@
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-10-29T10:00:00+00:00",
-    "EUR_USD": "2026-10-29T10:00:00+00:00",
-    "GBP_USD": "2026-10-29T10:00:00+00:00",
-    "XAG_USD": "2026-10-29T10:00:00+00:00"
+    "XAU_USD": "2026-10-29T11:00:00+00:00",
+    "EUR_USD": "2026-10-29T11:00:00+00:00",
+    "GBP_USD": "2026-10-29T11:00:00+00:00",
+    "XAG_USD": "2026-10-29T11:00:00+00:00"
   },
   "last_summary": "2026-10-19",
   "sent_per_day": {
     "2026-10-20": 1,
     "2026-10-22": 4,
-    "2026-10-27": 2
+    "2026-10-27": 2,
+    "2026-10-29": 1
   },
   "errors": 0,
   "last_error": "2026-10-29 04:28 UTC: HTTPError('504 Server Error: Gateway Timeout for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?granularity=H1&count=3000&price=M')"
