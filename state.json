@@ -171,10 +171,10 @@
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-10-29T02:00:00+00:00",
+    "XAU_USD": "2026-10-29T03:00:00+00:00",
     "EUR_USD": "2026-10-29T02:00:00+00:00",
     "GBP_USD": "2026-10-29T02:00:00+00:00",
-    "XAG_USD": "2026-10-29T02:00:00+00:00"
+    "XAG_USD": "2026-10-29T03:00:00+00:00"
   },
   "last_summary": "2026-10-19",
   "sent_per_day": {
@@ -182,6 +182,6 @@
     "2026-10-22": 4,
     "2026-10-27": 2
   },
-  "errors": 0,
-  "last_error": "2026-10-28 17:30 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
+  "errors": 1,
+  "last_error": "2026-10-29 04:28 UTC: HTTPError('504 Server Error: Gateway Timeout for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?granularity=H1&count=3000&price=M')"
 }
