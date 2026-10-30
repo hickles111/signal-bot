@@ -15,14 +15,14 @@
         "Stop sized to volatility (2x hourly ATR)"
       ],
       "session": "London session",
-      "stop": 52.38,
-      "hits": 1,
+      "stop": 50.903256730273945,
+      "hits": 2,
       "status": "open",
-      "result_r": 0.5,
+      "result_r": 1.5,
       "risk_gbp": 36.95498240081624,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-10-30T13:30:00+00:00"
+      "last_seen": "2026-10-30T14:15:00+00:00"
     },
     {
       "inst": "XAU_USD",
@@ -39,14 +39,14 @@
         "Stop sized to volatility (2x hourly ATR)"
       ],
       "session": "New York session",
-      "stop": 4007.175,
-      "hits": 1,
+      "stop": 3958.61900824381,
+      "hits": 2,
       "status": "open",
-      "result_r": 0.5,
+      "result_r": 1.5,
       "risk_gbp": 24.213949980396965,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-10-30T13:30:00+00:00"
+      "last_seen": "2026-10-30T14:15:00+00:00"
     }
   ],
   "closed": [
@@ -220,10 +220,10 @@
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-10-30T12:00:00+00:00",
-    "EUR_USD": "2026-10-30T12:00:00+00:00",
-    "GBP_USD": "2026-10-30T12:00:00+00:00",
-    "XAG_USD": "2026-10-30T12:00:00+00:00"
+    "XAU_USD": "2026-10-30T13:00:00+00:00",
+    "EUR_USD": "2026-10-30T13:00:00+00:00",
+    "GBP_USD": "2026-10-30T13:00:00+00:00",
+    "XAG_USD": "2026-10-30T13:00:00+00:00"
   },
   "last_summary": "2026-10-19",
   "sent_per_day": {
