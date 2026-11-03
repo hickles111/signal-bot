@@ -1,30 +1,5 @@
 {
-  "open": [
-    {
-      "inst": "XAG_USD",
-      "side": "SELL",
-      "time": "2026-11-03T09:00:00+00:00",
-      "entry": 48.699,
-      "sl": 49.474978558924256,
-      "tp1": 47.535032161613614,
-      "tp2": 46.37106432322722,
-      "tp3": 45.20709648484084,
-      "reasons": [
-        "Daily downtrend (below the 50-day average)",
-        "Broke the 48-hour low (48.862)",
-        "Stop sized to volatility (2x hourly ATR)"
-      ],
-      "session": "London session",
-      "stop": 49.474978558924256,
-      "hits": 0,
-      "status": "open",
-      "result_r": 0.0,
-      "risk_gbp": 28.92291081822262,
-      "lots": 0.01,
-      "too_big": true,
-      "last_seen": "2026-11-03T12:15:00+00:00"
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "inst": "XAU_USD",
@@ -241,13 +216,37 @@
       "lots": 0.01,
       "too_big": true,
       "last_seen": "2026-11-01T23:15:00+00:00"
+    },
+    {
+      "inst": "XAG_USD",
+      "side": "SELL",
+      "time": "2026-11-03T09:00:00+00:00",
+      "entry": 48.699,
+      "sl": 49.474978558924256,
+      "tp1": 47.535032161613614,
+      "tp2": 46.37106432322722,
+      "tp3": 45.20709648484084,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (48.862)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 49.474978558924256,
+      "hits": 0,
+      "status": "loss",
+      "result_r": -1.0,
+      "risk_gbp": 28.92291081822262,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-03T13:00:00+00:00"
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-11-03T11:00:00+00:00",
-    "EUR_USD": "2026-11-03T11:00:00+00:00",
-    "GBP_USD": "2026-11-03T11:00:00+00:00",
-    "XAG_USD": "2026-11-03T11:00:00+00:00"
+    "XAU_USD": "2026-11-03T12:00:00+00:00",
+    "EUR_USD": "2026-11-03T12:00:00+00:00",
+    "GBP_USD": "2026-11-03T12:00:00+00:00",
+    "XAG_USD": "2026-11-03T12:00:00+00:00"
   },
   "last_summary": "2026-10-26",
   "sent_per_day": {
