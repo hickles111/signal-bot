@@ -244,9 +244,9 @@
   ],
   "last_bar": {
     "XAU_USD": "2026-11-05T21:00:00+00:00",
-    "EUR_USD": "2026-11-05T20:00:00+00:00",
-    "GBP_USD": "2026-11-05T20:00:00+00:00",
-    "XAG_USD": "2026-11-05T20:00:00+00:00"
+    "EUR_USD": "2026-11-05T22:00:00+00:00",
+    "GBP_USD": "2026-11-05T22:00:00+00:00",
+    "XAG_USD": "2026-11-05T21:00:00+00:00"
   },
   "last_summary": "2026-10-26",
   "sent_per_day": {
@@ -256,6 +256,6 @@
     "2026-10-29": 2,
     "2026-11-03": 1
   },
-  "errors": 1,
+  "errors": 0,
   "last_error": "2026-11-05 22:30 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
 }
