@@ -1,5 +1,30 @@
 {
-  "open": [],
+  "open": [
+    {
+      "inst": "XAG_USD",
+      "side": "SELL",
+      "time": "2026-11-10T17:00:00+00:00",
+      "entry": 51.286,
+      "sl": 52.14847098013311,
+      "tp1": 49.992293529800335,
+      "tp2": 48.698587059600676,
+      "tp3": 47.40488058940102,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (51.328)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 52.14847098013311,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 32.35414747734612,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-10T17:00:00+00:00"
+    }
+  ],
   "closed": [
     {
       "inst": "XAU_USD",
@@ -267,10 +292,10 @@
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-11-10T15:00:00+00:00",
-    "EUR_USD": "2026-11-10T15:00:00+00:00",
-    "GBP_USD": "2026-11-10T15:00:00+00:00",
-    "XAG_USD": "2026-11-10T15:00:00+00:00"
+    "XAU_USD": "2026-11-10T16:00:00+00:00",
+    "EUR_USD": "2026-11-10T16:00:00+00:00",
+    "GBP_USD": "2026-11-10T16:00:00+00:00",
+    "XAG_USD": "2026-11-10T16:00:00+00:00"
   },
   "last_summary": "2026-10-26",
   "sent_per_day": {
@@ -279,7 +304,8 @@
     "2026-10-27": 2,
     "2026-10-29": 2,
     "2026-11-03": 1,
-    "2026-11-06": 1
+    "2026-11-06": 1,
+    "2026-11-10": 1
   },
   "errors": 0,
   "last_error": "2026-11-10 13:34 UTC: HTTPError('504 Server Error: Gateway Timeout for url: https://api-fxpractice.oanda.com/v3/instruments/XAU_USD/candles?granularity=H1&count=3000&price=M')"
