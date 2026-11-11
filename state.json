@@ -1,5 +1,30 @@
 {
-  "open": [],
+  "open": [
+    {
+      "inst": "EUR_USD",
+      "side": "SELL",
+      "time": "2026-11-11T10:00:00+00:00",
+      "entry": 1.11382,
+      "sl": 1.1159163382466581,
+      "tp1": 1.110675492630013,
+      "tp2": 1.107530985260026,
+      "tp3": 1.104386477890039,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (1.11393)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 1.1159163382466581,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 1.5734258872796085,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-11T10:00:00+00:00"
+    }
+  ],
   "closed": [
     {
       "inst": "XAU_USD",
@@ -291,10 +316,10 @@
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-11-11T08:00:00+00:00",
-    "EUR_USD": "2026-11-11T08:00:00+00:00",
-    "GBP_USD": "2026-11-11T08:00:00+00:00",
-    "XAG_USD": "2026-11-11T08:00:00+00:00"
+    "XAU_USD": "2026-11-11T09:00:00+00:00",
+    "EUR_USD": "2026-11-11T09:00:00+00:00",
+    "GBP_USD": "2026-11-11T09:00:00+00:00",
+    "XAG_USD": "2026-11-11T09:00:00+00:00"
   },
   "last_summary": "2026-10-26",
   "sent_per_day": {
@@ -304,7 +329,8 @@
     "2026-10-29": 2,
     "2026-11-03": 1,
     "2026-11-06": 1,
-    "2026-11-10": 1
+    "2026-11-10": 1,
+    "2026-11-11": 1
   },
   "errors": 0,
   "last_error": "2026-11-10 21:06 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
