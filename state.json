@@ -15,14 +15,14 @@
         "Stop sized to volatility (2x hourly ATR)"
       ],
       "session": "London session",
-      "stop": 1.11382,
-      "hits": 1,
+      "stop": 1.110675492630013,
+      "hits": 2,
       "status": "open",
-      "result_r": 0.5,
+      "result_r": 1.5,
       "risk_gbp": 1.5734258872796085,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-12T02:00:00+00:00"
+      "last_seen": "2026-11-12T02:45:00+00:00"
     },
     {
       "inst": "XAU_USD",
@@ -46,7 +46,7 @@
       "risk_gbp": 21.462610500362313,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-12T02:00:00+00:00"
+      "last_seen": "2026-11-12T02:45:00+00:00"
     }
   ],
   "closed": [
