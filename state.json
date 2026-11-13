@@ -1,30 +1,6 @@
 {
   "open": [
     {
-      "inst": "EUR_USD",
-      "side": "SELL",
-      "time": "2026-11-11T10:00:00+00:00",
-      "entry": 1.11382,
-      "sl": 1.1159163382466581,
-      "tp1": 1.110675492630013,
-      "tp2": 1.107530985260026,
-      "tp3": 1.104386477890039,
-      "reasons": [
-        "Daily downtrend (below the 50-day average)",
-        "Broke the 48-hour low (1.11393)",
-        "Stop sized to volatility (2x hourly ATR)"
-      ],
-      "session": "London session",
-      "stop": 1.110675492630013,
-      "hits": 2,
-      "status": "open",
-      "result_r": 1.5,
-      "risk_gbp": 1.5734258872796085,
-      "lots": 0.01,
-      "too_big": true,
-      "last_seen": "2026-11-13T14:15:00+00:00"
-    },
-    {
       "inst": "XAG_USD",
       "side": "SELL",
       "time": "2026-11-12T09:00:00+00:00",
@@ -46,7 +22,7 @@
       "risk_gbp": 28.037562133979613,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-13T14:15:00+00:00"
+      "last_seen": "2026-11-13T15:00:00+00:00"
     }
   ],
   "closed": [
@@ -385,13 +361,37 @@
       "lots": 0.01,
       "too_big": true,
       "last_seen": "2026-11-13T01:30:00+00:00"
+    },
+    {
+      "inst": "EUR_USD",
+      "side": "SELL",
+      "time": "2026-11-11T10:00:00+00:00",
+      "entry": 1.11382,
+      "sl": 1.1159163382466581,
+      "tp1": 1.110675492630013,
+      "tp2": 1.107530985260026,
+      "tp3": 1.104386477890039,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (1.11393)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 1.110675492630013,
+      "hits": 3,
+      "status": "tp3",
+      "result_r": 3.0,
+      "risk_gbp": 1.5734258872796085,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-13T14:30:00+00:00"
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-11-13T13:00:00+00:00",
-    "EUR_USD": "2026-11-13T13:00:00+00:00",
-    "GBP_USD": "2026-11-13T13:00:00+00:00",
-    "XAG_USD": "2026-11-13T13:00:00+00:00"
+    "XAU_USD": "2026-11-13T14:00:00+00:00",
+    "EUR_USD": "2026-11-13T14:00:00+00:00",
+    "GBP_USD": "2026-11-13T14:00:00+00:00",
+    "XAG_USD": "2026-11-13T14:00:00+00:00"
   },
   "last_summary": "2026-10-26",
   "sent_per_day": {
