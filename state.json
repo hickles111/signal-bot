@@ -1,30 +1,6 @@
 {
   "open": [
     {
-      "inst": "XAG_USD",
-      "side": "SELL",
-      "time": "2026-11-12T09:00:00+00:00",
-      "entry": 50.7715,
-      "sl": 51.51593091973172,
-      "tp1": 49.65485362040242,
-      "tp2": 48.53820724080484,
-      "tp3": 47.421560861207254,
-      "reasons": [
-        "Daily downtrend (below the 50-day average)",
-        "Broke the 48-hour low (51.096)",
-        "Stop sized to volatility (2x hourly ATR)"
-      ],
-      "session": "London session",
-      "stop": 49.65485362040242,
-      "hits": 2,
-      "status": "open",
-      "result_r": 1.5,
-      "risk_gbp": 28.037562133979613,
-      "lots": 0.01,
-      "too_big": true,
-      "last_seen": "2026-11-13T22:00:00+00:00"
-    },
-    {
       "inst": "EUR_USD",
       "side": "SELL",
       "time": "2026-11-13T16:00:00+00:00",
@@ -46,7 +22,7 @@
       "risk_gbp": 1.989904100353697,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-15T22:30:00+00:00"
+      "last_seen": "2026-11-15T23:15:00+00:00"
     },
     {
       "inst": "GBP_USD",
@@ -70,7 +46,7 @@
       "risk_gbp": 2.325959746946125,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-15T22:30:00+00:00"
+      "last_seen": "2026-11-15T23:15:00+00:00"
     }
   ],
   "closed": [
@@ -433,12 +409,36 @@
       "lots": 0.01,
       "too_big": true,
       "last_seen": "2026-11-13T14:30:00+00:00"
+    },
+    {
+      "inst": "XAG_USD",
+      "side": "SELL",
+      "time": "2026-11-12T09:00:00+00:00",
+      "entry": 50.7715,
+      "sl": 51.51593091973172,
+      "tp1": 49.65485362040242,
+      "tp2": 48.53820724080484,
+      "tp3": 47.421560861207254,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (51.096)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 49.65485362040242,
+      "hits": 2,
+      "status": "timeout",
+      "result_r": 2.4114344689558598,
+      "risk_gbp": 28.037562133979613,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-15T23:15:00+00:00"
     }
   ],
   "last_bar": {
     "XAU_USD": "2026-11-13T21:00:00+00:00",
-    "EUR_USD": "2026-11-13T21:00:00+00:00",
-    "GBP_USD": "2026-11-13T21:00:00+00:00",
+    "EUR_USD": "2026-11-15T22:00:00+00:00",
+    "GBP_USD": "2026-11-15T22:00:00+00:00",
     "XAG_USD": "2026-11-13T21:00:00+00:00"
   },
   "last_summary": "2026-10-26",
