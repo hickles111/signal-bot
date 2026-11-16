@@ -22,7 +22,7 @@
       "risk_gbp": 1.989904100353697,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-16T11:45:00+00:00"
+      "last_seen": "2026-11-16T16:00:00+00:00"
     },
     {
       "inst": "GBP_USD",
@@ -46,7 +46,31 @@
       "risk_gbp": 2.325959746946125,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-16T10:30:00+00:00"
+      "last_seen": "2026-11-16T16:00:00+00:00"
+    },
+    {
+      "inst": "XAG_USD",
+      "side": "SELL",
+      "time": "2026-11-16T16:00:00+00:00",
+      "entry": 46.727,
+      "sl": 47.58880345237737,
+      "tp1": 45.43429482143394,
+      "tp2": 44.14158964286787,
+      "tp3": 42.84888446430181,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (46.972)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 47.58880345237737,
+      "hits": 0,
+      "status": "open",
+      "result_r": 0.0,
+      "risk_gbp": 32.67773813843706,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-16T16:00:00+00:00"
     }
   ],
   "closed": [
@@ -436,10 +460,10 @@
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-11-16T09:00:00+00:00",
-    "EUR_USD": "2026-11-16T09:00:00+00:00",
-    "GBP_USD": "2026-11-16T09:00:00+00:00",
-    "XAG_USD": "2026-11-16T09:00:00+00:00"
+    "XAU_USD": "2026-11-16T15:00:00+00:00",
+    "EUR_USD": "2026-11-16T15:00:00+00:00",
+    "GBP_USD": "2026-11-16T15:00:00+00:00",
+    "XAG_USD": "2026-11-16T15:00:00+00:00"
   },
   "last_summary": "2026-10-26",
   "sent_per_day": {
@@ -452,8 +476,9 @@
     "2026-11-10": 1,
     "2026-11-11": 2,
     "2026-11-12": 2,
-    "2026-11-13": 2
+    "2026-11-13": 2,
+    "2026-11-16": 1
   },
-  "errors": 2,
+  "errors": 0,
   "last_error": "2026-11-16 14:09 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
 }
