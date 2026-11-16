@@ -22,7 +22,7 @@
       "risk_gbp": 1.989904100353697,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-16T02:45:00+00:00"
+      "last_seen": "2026-11-16T03:45:00+00:00"
     },
     {
       "inst": "GBP_USD",
@@ -46,7 +46,7 @@
       "risk_gbp": 2.325959746946125,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-16T02:45:00+00:00"
+      "last_seen": "2026-11-16T03:45:00+00:00"
     }
   ],
   "closed": [
@@ -454,6 +454,6 @@
     "2026-11-12": 2,
     "2026-11-13": 2
   },
-  "errors": 0,
-  "last_error": "2026-11-16 02:02 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
+  "errors": 1,
+  "last_error": "2026-11-16 03:49 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
 }
