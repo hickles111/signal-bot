@@ -17,12 +17,12 @@
       "session": "London/New York overlap",
       "stop": 1.1054512501918976,
       "hits": 0,
-      "status": "open",
-      "result_r": 0.0,
+      "status": "timeout",
+      "result_r": 1.1477433842282154,
       "risk_gbp": 1.989904100353697,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-16T16:00:00+00:00"
+      "last_seen": "2026-11-17T00:00:00+00:00"
     },
     {
       "inst": "GBP_USD",
@@ -41,12 +41,12 @@
       "session": "London/New York overlap",
       "stop": 1.3242130580176652,
       "hits": 0,
-      "status": "open",
-      "result_r": 0.0,
+      "status": "timeout",
+      "result_r": 0.8786036529343728,
       "risk_gbp": 2.325959746946125,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-16T16:00:00+00:00"
+      "last_seen": "2026-11-17T00:00:00+00:00"
     },
     {
       "inst": "XAG_USD",
@@ -457,6 +457,54 @@
       "lots": 0.01,
       "too_big": true,
       "last_seen": "2026-11-15T23:15:00+00:00"
+    },
+    {
+      "inst": "EUR_USD",
+      "side": "SELL",
+      "time": "2026-11-13T16:00:00+00:00",
+      "entry": 1.10282,
+      "sl": 1.1054512501918976,
+      "tp1": 1.0988731247121535,
+      "tp2": 1.094926249424307,
+      "tp3": 1.0909793741364608,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (1.10430)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 1.1054512501918976,
+      "hits": 0,
+      "status": "timeout",
+      "result_r": 1.1477433842282154,
+      "risk_gbp": 1.989904100353697,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-17T00:00:00+00:00"
+    },
+    {
+      "inst": "GBP_USD",
+      "side": "SELL",
+      "time": "2026-11-13T17:00:00+00:00",
+      "entry": 1.32114,
+      "sl": 1.3242130580176652,
+      "tp1": 1.316530412973502,
+      "tp2": 1.311920825947004,
+      "tp3": 1.3073112389205062,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (1.32181)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London/New York overlap",
+      "stop": 1.3242130580176652,
+      "hits": 0,
+      "status": "timeout",
+      "result_r": 0.8786036529343728,
+      "risk_gbp": 2.325959746946125,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-17T00:00:00+00:00"
     }
   ],
   "last_bar": {
@@ -479,6 +527,6 @@
     "2026-11-13": 2,
     "2026-11-16": 1
   },
-  "errors": 9,
-  "last_error": "2026-11-16 23:27 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
+  "errors": 10,
+  "last_error": "2026-11-17 00:04 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
 }
