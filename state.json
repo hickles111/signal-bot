@@ -527,6 +527,6 @@
     "2026-11-13": 2,
     "2026-11-16": 1
   },
-  "errors": 0,
-  "last_error": "2026-11-17 01:01 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
+  "errors": 1,
+  "last_error": "2026-11-17 02:52 UTC: RuntimeError('OANDA rejected the API token (HTTP 401) - check the OANDA_API_TOKEN secret')"
 }
