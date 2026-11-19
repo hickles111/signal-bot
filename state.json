@@ -1,30 +1,6 @@
 {
   "open": [
     {
-      "inst": "XAU_USD",
-      "side": "SELL",
-      "time": "2026-11-18T08:00:00+00:00",
-      "entry": 3774.205,
-      "sl": 3807.2501527196773,
-      "tp1": 3724.6372709204834,
-      "tp2": 3675.0695418409673,
-      "tp3": 3625.5018127614508,
-      "reasons": [
-        "Daily downtrend (below the 50-day average)",
-        "Broke the 48-hour low (3,776.00)",
-        "Stop sized to volatility (2x hourly ATR)"
-      ],
-      "session": "London session",
-      "stop": 3774.205,
-      "hits": 1,
-      "status": "open",
-      "result_r": 0.5,
-      "risk_gbp": 25.106673595512344,
-      "lots": 0.01,
-      "too_big": true,
-      "last_seen": "2026-11-19T14:30:00+00:00"
-    },
-    {
       "inst": "GBP_USD",
       "side": "SELL",
       "time": "2026-11-18T09:00:00+00:00",
@@ -39,14 +15,14 @@
         "Stop sized to volatility (2x hourly ATR)"
       ],
       "session": "London session",
-      "stop": 1.3178403385877282,
-      "hits": 0,
+      "stop": 1.3154,
+      "hits": 1,
       "status": "open",
-      "result_r": 0.0,
+      "result_r": 0.5,
       "risk_gbp": 1.8540084237252021,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-19T14:30:00+00:00"
+      "last_seen": "2026-11-19T22:15:00+00:00"
     },
     {
       "inst": "XAG_USD",
@@ -63,14 +39,14 @@
         "Stop sized to volatility (2x hourly ATR)"
       ],
       "session": "London/New York overlap",
-      "stop": 45.97933639072335,
-      "hits": 0,
+      "stop": 43.993495413914985,
+      "hits": 2,
       "status": "open",
-      "result_r": 0.0,
+      "result_r": 1.5,
       "risk_gbp": 30.17536813262972,
       "lots": 0.01,
       "too_big": true,
-      "last_seen": "2026-11-19T14:30:00+00:00"
+      "last_seen": "2026-11-19T22:00:00+00:00"
     }
   ],
   "closed": [
@@ -625,13 +601,37 @@
       "lots": 0.01,
       "too_big": true,
       "last_seen": "2026-11-19T08:00:00+00:00"
+    },
+    {
+      "inst": "XAU_USD",
+      "side": "SELL",
+      "time": "2026-11-18T08:00:00+00:00",
+      "entry": 3774.205,
+      "sl": 3807.2501527196773,
+      "tp1": 3724.6372709204834,
+      "tp2": 3675.0695418409673,
+      "tp3": 3625.5018127614508,
+      "reasons": [
+        "Daily downtrend (below the 50-day average)",
+        "Broke the 48-hour low (3,776.00)",
+        "Stop sized to volatility (2x hourly ATR)"
+      ],
+      "session": "London session",
+      "stop": 3724.6372709204834,
+      "hits": 3,
+      "status": "tp3",
+      "result_r": 3.0,
+      "risk_gbp": 25.106673595512344,
+      "lots": 0.01,
+      "too_big": true,
+      "last_seen": "2026-11-19T21:45:00+00:00"
     }
   ],
   "last_bar": {
-    "XAU_USD": "2026-11-19T13:00:00+00:00",
-    "EUR_USD": "2026-11-19T13:00:00+00:00",
-    "GBP_USD": "2026-11-19T13:00:00+00:00",
-    "XAG_USD": "2026-11-19T13:00:00+00:00"
+    "XAU_USD": "2026-11-19T21:00:00+00:00",
+    "EUR_USD": "2026-11-19T21:00:00+00:00",
+    "GBP_USD": "2026-11-19T21:00:00+00:00",
+    "XAG_USD": "2026-11-19T21:00:00+00:00"
   },
   "last_summary": "2026-10-26",
   "sent_per_day": {
